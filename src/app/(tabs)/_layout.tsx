@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 
@@ -12,10 +13,11 @@ export default function TabLayout() {
         tabBarInactiveTintColor: colors.dark.textMuted,
         tabBarStyle: {
           position: 'absolute',
-          height: Platform.select({ ios: 84, default: 68 }),
-          paddingTop: 8,
-          paddingBottom: Platform.select({ ios: 24, default: 10 }),
+          height: Platform.select({ ios: 92, default: 76 }),
+          paddingTop: 10,
+          paddingBottom: Platform.select({ ios: 28, default: 12 }),
           borderTopColor: colors.dark.border,
+          borderTopWidth: 1,
           backgroundColor: colors.dark.surface,
         },
         tabBarLabelStyle: {
@@ -27,12 +29,18 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" color={String(color)} size={size + 2} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-circle" color={String(color)} size={size + 3} />
+          ),
         }}
       />
     </Tabs>

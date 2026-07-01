@@ -1,45 +1,71 @@
 import { router, type Href } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
-import { Button, Chip } from 'react-native-paper';
+import { useCallback } from 'react';
+import type { ListRenderItem } from 'react-native';
+import { ActivityIndicator, FlatList, Text, View } from 'react-native';
+import { Button } from 'react-native-paper';
 
+import { HeroBanner } from '@/components/media/HeroBanner';
+import { MediaRail } from '@/components/media/MediaRail';
 import { Screen } from '@/components/layout/Screen';
-
-const detailPreviewHref = {
-  pathname: '/detail/[mediaId]',
-  params: { mediaId: 'phase-1-preview' },
-} as unknown as Href;
+import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
+import type { MediaItem, MediaRail as MediaRailType } from '@/types/media';
+import { HOME_FEED_LIST_PROPS } from '@/utils/listPerf';
 
 export default function HomeScreen() {
-  return (
-    <Screen edges={['top', 'left', 'right']}>
-      <View className="flex-1 px-5 pt-4">
-        <View className="rounded-lg bg-brand-surface p-5">
-          <Chip compact className="self-start bg-brand-elevated" textStyle={{ color: '#AAB4C5' }}>
-            Phase 1
-          </Chip>
-          <Text className="mt-4 text-3xl font-bold text-white">EdStream</Text>
-          <Text className="mt-2 text-base leading-6 text-slate-300">
-            Expo Router foundation is ready for a Hotstar-inspired home feed.
+  const { data, error, isLoading, retry } = useHomeFeed();
+
+  const handleSelectMedia = useCallback((item: MediaItem) => {
+    router.push({
+      pathname: '/detail/[mediaId]',
+      params: { mediaId: item.id },
+    } as unknown as Href);
+  }, []);
+
+  const renderRail = useCallback<ListRenderItem<MediaRailType>>(
+    ({ item }) => <MediaRail rail={item} onSelectMedia={handleSelectMedia} />,
+    [handleSelectMedia],
+  );
+
+  if (isLoading) {
+    return (
+      <Screen edges={['top', 'left', 'right']}>
+        <View className="flex-1 items-center justify-center px-5">
+          <ActivityIndicator color="#4F8CFF" size="large" />
+          <Text className="mt-4 text-base font-semibold text-white">Loading EdStream</Text>
+          <Text className="mt-1 text-center text-sm text-slate-400">
+            Preparing your personalized media rails.
           </Text>
-          <Button
-            mode="contained"
-            buttonColor="#4F8CFF"
-            textColor="#FFFFFF"
-            className="mt-5 self-start"
-            onPress={() => router.push(detailPreviewHref)}>
-            Open Detail Shell
+        </View>
+      </Screen>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <Screen edges={['top', 'left', 'right']}>
+        <View className="flex-1 items-center justify-center px-6">
+          <Text className="text-center text-2xl font-bold text-white">Feed unavailable</Text>
+          <Text className="mt-2 text-center text-base text-slate-400">
+            {error ?? 'No content was returned.'}
+          </Text>
+          <Button mode="contained" buttonColor="#4F8CFF" className="mt-5" onPress={retry}>
+            Try Again
           </Button>
         </View>
+      </Screen>
+    );
+  }
 
-        <Pressable className="mt-5 rounded-lg border border-brand-line bg-brand-elevated p-4">
-          <Text className="text-sm font-semibold uppercase tracking-wider text-brand-green">
-            Next
-          </Text>
-          <Text className="mt-2 text-lg font-bold text-white">
-            Phase 2 adds mock API data, hero banners, and media rails.
-          </Text>
-        </Pressable>
-      </View>
+  return (
+    <Screen edges={['left', 'right']}>
+      <FlatList
+        {...HOME_FEED_LIST_PROPS}
+        data={data.rails}
+        keyExtractor={(rail) => rail.id}
+        renderItem={renderRail}
+        ListHeaderComponent={<HeroBanner item={data.hero} />}
+        contentContainerStyle={{ paddingBottom: 110 }}
+      />
     </Screen>
   );
 }
