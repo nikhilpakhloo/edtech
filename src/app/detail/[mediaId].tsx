@@ -1,10 +1,13 @@
 import { router, Stack, useLocalSearchParams, type Href } from 'expo-router';
 import { Image } from 'expo-image';
 import { useCallback } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button, Divider } from 'react-native-paper';
 
+import { ErrorState } from '@/components/feedback/ErrorState';
+import { DetailSkeleton } from '@/components/feedback/Skeleton';
 import { Screen } from '@/components/layout/Screen';
+import { LearningVideoPlayer } from '@/components/media/LearningVideoPlayer';
 import { MediaRail } from '@/components/media/MediaRail';
 import { MetadataPill } from '@/components/media/MetadataPill';
 import { useMediaDetail } from '@/features/detail/hooks/useMediaDetail';
@@ -23,12 +26,9 @@ export default function DetailScreen() {
 
   if (isLoading) {
     return (
-      <Screen>
+      <Screen edges={['left', 'right']}>
         <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 items-center justify-center px-5">
-          <ActivityIndicator color="#4F8CFF" size="large" />
-          <Text className="mt-4 text-base font-semibold text-white">Loading title</Text>
-        </View>
+        <DetailSkeleton />
       </Screen>
     );
   }
@@ -37,15 +37,12 @@ export default function DetailScreen() {
     return (
       <Screen>
         <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-center text-2xl font-bold text-white">Title unavailable</Text>
-          <Text className="mt-2 text-center text-base text-slate-400">
-            {error ?? 'We could not find this EdStream title.'}
-          </Text>
-          <Button mode="contained" buttonColor="#4F8CFF" className="mt-5" onPress={retry}>
-            Retry
-          </Button>
-        </View>
+        <ErrorState
+          title="Title unavailable"
+          message={error ?? 'We could not find this EdStream title.'}
+          actionLabel="Retry"
+          onRetry={retry}
+        />
       </Screen>
     );
   }
@@ -62,6 +59,7 @@ export default function DetailScreen() {
             source={{ uri: item.backdropUrl }}
             cachePolicy="disk"
             contentFit="cover"
+            recyclingKey={`detail-${item.id}`}
             transition={220}
             style={StyleSheet.absoluteFill}
           />
@@ -89,6 +87,14 @@ export default function DetailScreen() {
             <Button mode="outlined" textColor="#F8FAFC">
               Watchlist
             </Button>
+          </View>
+
+          <View className="mt-6">
+            <LearningVideoPlayer
+              title={item.title}
+              videoUrl={item.videoUrl}
+              streamType={item.streamType}
+            />
           </View>
 
           <Text className="mt-5 text-base leading-7 text-slate-200">{item.description}</Text>

@@ -23,6 +23,7 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
           source={{ uri: item.posterUrl }}
           cachePolicy="disk"
           contentFit="cover"
+          recyclingKey={item.id}
           transition={180}
           style={styles.poster}
         />

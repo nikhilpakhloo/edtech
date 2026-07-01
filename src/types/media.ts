@@ -1,4 +1,5 @@
 export type MediaKind = 'movie' | 'series' | 'live' | 'documentary';
+export type StreamType = 'hls' | 'mp4';
 
 export type MediaItem = {
   id: string;
@@ -8,6 +9,9 @@ export type MediaItem = {
   kind: MediaKind;
   posterUrl: string;
   backdropUrl: string;
+  videoUrl: string;
+  trailerUrl: string;
+  streamType: StreamType;
   logoUrl?: string;
   genres: string[];
   languages: string[];

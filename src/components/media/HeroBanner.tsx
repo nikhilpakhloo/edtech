@@ -27,6 +27,7 @@ function HeroBannerBase({ item }: HeroBannerProps) {
           source={{ uri: item.backdropUrl }}
           cachePolicy="disk"
           contentFit="cover"
+          recyclingKey={`hero-${item.id}`}
           transition={220}
           style={StyleSheet.absoluteFill}
         />

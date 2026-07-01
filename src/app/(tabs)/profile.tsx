@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { Avatar, List, Switch } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Screen } from '@/components/layout/Screen';
 import { apiService } from '@/data/apiService';
 import type { ProfileResponse } from '@/types/media';
+import { getTabBarContentPadding } from '@/utils/tabBar';
 
 export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
 
   useEffect(() => {
@@ -35,7 +38,14 @@ export default function ProfileScreen() {
 
   return (
     <Screen edges={['top', 'left', 'right']}>
-      <View className="flex-1 px-5 pt-4">
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: getTabBarContentPadding(insets.bottom),
+          paddingHorizontal: 20,
+          paddingTop: 16,
+        }}>
         <View className="flex-row items-center rounded-lg bg-brand-surface p-4">
           <Avatar.Text
             size={56}
@@ -63,7 +73,7 @@ export default function ProfileScreen() {
             />
           ))}
         </View>
-      </View>
+      </ScrollView>
     </Screen>
   );
 }

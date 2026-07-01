@@ -7,6 +7,7 @@ type HomeFeedState = {
   data: HomeFeedResponse | null;
   error: string | null;
   isLoading: boolean;
+  isRefreshing: boolean;
 };
 
 export function useHomeFeed() {
@@ -14,20 +15,27 @@ export function useHomeFeed() {
     data: null,
     error: null,
     isLoading: true,
+    isRefreshing: false,
   });
 
-  const loadFeed = useCallback(async () => {
-    setState((current) => ({ ...current, error: null, isLoading: true }));
+  const loadFeed = useCallback(async (mode: 'initial' | 'refresh' = 'initial') => {
+    setState((current) => ({
+      ...current,
+      error: null,
+      isLoading: mode === 'initial',
+      isRefreshing: mode === 'refresh',
+    }));
 
     try {
       const data = await apiService.getHomeFeed();
-      setState({ data, error: null, isLoading: false });
+      setState({ data, error: null, isLoading: false, isRefreshing: false });
     } catch (error) {
-      setState({
-        data: null,
+      setState((current) => ({
+        data: mode === 'refresh' ? current.data : null,
         error: error instanceof Error ? error.message : 'Unable to load EdStream.',
         isLoading: false,
-      });
+        isRefreshing: false,
+      }));
     }
   }, []);
 
@@ -39,7 +47,7 @@ export function useHomeFeed() {
         .getHomeFeed()
         .then((data) => {
           if (isMounted) {
-            setState({ data, error: null, isLoading: false });
+            setState({ data, error: null, isLoading: false, isRefreshing: false });
           }
         })
         .catch((error: unknown) => {
@@ -48,6 +56,7 @@ export function useHomeFeed() {
               data: null,
               error: error instanceof Error ? error.message : 'Unable to load EdStream.',
               isLoading: false,
+              isRefreshing: false,
             });
           }
         });
@@ -59,5 +68,9 @@ export function useHomeFeed() {
     };
   }, []);
 
-  return { ...state, retry: loadFeed };
+  return {
+    ...state,
+    refresh: () => loadFeed('refresh'),
+    retry: () => loadFeed('initial'),
+  };
 }

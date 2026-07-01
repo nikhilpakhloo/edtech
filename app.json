@@ -44,6 +44,12 @@
             "targetSdkVersion": 36
           }
         }
+      ],
+      [
+        "expo-video",
+        {
+          "supportsPictureInPicture": true
+        }
       ]
     ],
     "experiments": {

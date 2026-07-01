@@ -12,6 +12,11 @@ const mediaItems: MediaItem[] = [
       'https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=600&auto=format&fit=crop',
     backdropUrl:
       'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    trailerUrl:
+      'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+    streamType: 'hls',
     genres: ['AI', 'Pedagogy', 'Future Skills'],
     languages: ['English', 'Hindi'],
     rating: 'U/A 13+',
@@ -34,6 +39,11 @@ const mediaItems: MediaItem[] = [
       'https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=600&auto=format&fit=crop',
     backdropUrl:
       'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    trailerUrl:
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    streamType: 'hls',
     genres: ['UI/UX', 'Frontend', 'Systems'],
     languages: ['English'],
     rating: 'U',
@@ -56,6 +66,11 @@ const mediaItems: MediaItem[] = [
       'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop',
     backdropUrl:
       'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+    trailerUrl:
+      'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    streamType: 'hls',
     genres: ['React Native', 'Expo', 'TypeScript'],
     languages: ['English', 'Tamil'],
     rating: 'U/A 7+',
@@ -79,6 +94,11 @@ const mediaItems: MediaItem[] = [
       'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=600&auto=format&fit=crop',
     backdropUrl:
       'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    trailerUrl:
+      'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+    streamType: 'hls',
     genres: ['Math', 'Live', 'Competition'],
     languages: ['English', 'Hindi', 'Telugu'],
     rating: 'U',
@@ -99,6 +119,11 @@ const mediaItems: MediaItem[] = [
       'https://images.unsplash.com/photo-1461360370896-922624d12aa1?q=80&w=600&auto=format&fit=crop',
     backdropUrl:
       'https://images.unsplash.com/photo-1505664194779-8beaceb93744?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    trailerUrl:
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    streamType: 'hls',
     genres: ['History', 'World Affairs', 'Maps'],
     languages: ['English'],
     rating: 'U/A 13+',
@@ -120,6 +145,11 @@ const mediaItems: MediaItem[] = [
       'https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=600&auto=format&fit=crop',
     backdropUrl:
       'https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+    trailerUrl:
+      'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    streamType: 'hls',
     genres: ['Business', 'Startups', 'Strategy'],
     languages: ['English', 'Hindi'],
     rating: 'U/A 13+',
@@ -142,6 +172,11 @@ const mediaItems: MediaItem[] = [
       'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop',
     backdropUrl:
       'https://images.unsplash.com/photo-1550439062-609e1531270e?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    trailerUrl:
+      'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+    streamType: 'hls',
     genres: ['Coding', 'Product', 'Creative Tech'],
     languages: ['English'],
     rating: 'U/A 7+',
@@ -164,6 +199,11 @@ const mediaItems: MediaItem[] = [
       'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=600&auto=format&fit=crop',
     backdropUrl:
       'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    trailerUrl:
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    streamType: 'hls',
     genres: ['Exams', 'Revision', 'Study Skills'],
     languages: ['English', 'Hindi'],
     rating: 'U',
