@@ -5,7 +5,9 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import { memo, useCallback, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { useAppTheme } from "@/theme/AppTheme";
 import type { StreamType } from "@/types/media";
+import { selectionHaptic } from "@/utils/haptics";
 
 type LearningVideoPlayerProps = {
   title: string;
@@ -26,6 +28,7 @@ function LearningVideoPlayerBase({
   elevated = false,
   controlsTop = 16,
 }: LearningVideoPlayerProps) {
+  const { colors, isDark } = useAppTheme();
   const [hasFirstFrame, setHasFirstFrame] = useState(false);
   const player = useVideoPlayer(
     {
@@ -53,6 +56,7 @@ function LearningVideoPlayerBase({
   });
 
   const handleToggleMute = useCallback(() => {
+    selectionHaptic();
     // expo-video exposes mute as a mutable player control.
     // eslint-disable-next-line react-hooks/immutability
     player.muted = !player.muted;
@@ -62,9 +66,12 @@ function LearningVideoPlayerBase({
     <View
       className={
         elevated
-          ? "overflow-hidden rounded-b-lg border-b border-white/10 bg-black"
-          : "overflow-hidden rounded-lg border border-white/10 bg-black"
+          ? "overflow-hidden rounded-b-lg border-b bg-black"
+          : "overflow-hidden rounded-lg border bg-black"
       }
+      style={{
+        borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
+      }}
     >
       <VideoView
         player={player}

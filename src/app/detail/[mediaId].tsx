@@ -19,10 +19,12 @@ import { MediaRail } from "@/components/media/MediaRail";
 import { MetadataPill } from "@/components/media/MetadataPill";
 import { DetailAnimatedHeader } from "@/features/detail/components/DetailAnimatedHeader";
 import { useMediaDetail } from "@/features/detail/hooks/useMediaDetail";
+import { useAppTheme } from "@/theme/AppTheme";
 import type { MediaItem } from "@/types/media";
 
 export default function DetailScreen() {
   const videoControlTop = 8;
+  const { colors, isDark } = useAppTheme();
   const { mediaId } = useLocalSearchParams<{ mediaId: string }>();
   const { error, isLoading, item, related, retry } = useMediaDetail(mediaId);
   const scrollY = useSharedValue(0);
@@ -66,7 +68,7 @@ export default function DetailScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <NativeStatusBar
         backgroundColor="transparent"
-        barStyle="light-content"
+        barStyle={isDark ? "light-content" : "dark-content"}
         translucent
       />
       <DetailAnimatedHeader title={item.title} scrollY={scrollY} />
@@ -84,6 +86,7 @@ export default function DetailScreen() {
 
       <Animated.ScrollView
         className="flex-1"
+        style={{ backgroundColor: colors.background }}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
@@ -98,18 +101,25 @@ export default function DetailScreen() {
             ) : null}
           </View>
 
-          <Text className="mt-5 text-base leading-7 text-slate-200">
+          <Text className="mt-5 text-base leading-7" style={{ color: colors.text }}>
             {item.description}
           </Text>
           <Text className="mt-4 text-sm font-semibold uppercase tracking-[1.5px] text-brand-cyan">
             {item.genres.join(" - ")}
           </Text>
 
-          <Divider className="my-6 bg-brand-line" />
+          <Divider className="my-6" style={{ backgroundColor: colors.border }} />
 
-          <View className="rounded-lg border border-white/10 bg-brand-surface p-4">
-            <Text className="text-lg font-bold text-white">Metadata</Text>
-            <Text className="mt-3 text-sm leading-6 text-slate-300">
+          <View
+            className="rounded-lg border p-4"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
+            }}>
+            <Text className="text-lg font-bold" style={{ color: colors.text }}>
+              Metadata
+            </Text>
+            <Text className="mt-3 text-sm leading-6" style={{ color: colors.textMuted }}>
               {item.kind.toUpperCase()} - {item.maturityNote}
               {item.episodeCount ? ` - ${item.episodeCount} episodes` : ""}
             </Text>

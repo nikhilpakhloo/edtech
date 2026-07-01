@@ -3,7 +3,7 @@ import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors } from '@/theme/tokens';
+import { useAppTheme } from '@/theme/AppTheme';
 
 const BASE_TAB_BAR_HEIGHT = 64;
 const IOS_TAB_BAR_HEIGHT = 64;
@@ -12,6 +12,7 @@ const MIN_IOS_BOTTOM_PADDING = 24;
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const { colors: themeColors, isDark } = useAppTheme();
   const bottomPadding =
     Platform.OS === 'ios'
       ? Math.max(insets.bottom, MIN_IOS_BOTTOM_PADDING)
@@ -26,17 +27,17 @@ export default function TabLayout() {
       initialRouteName="index"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.dark.text,
-        tabBarInactiveTintColor: colors.dark.textMuted,
+        tabBarActiveTintColor: themeColors.text,
+        tabBarInactiveTintColor: themeColors.textMuted,
         tabBarStyle: {
           position: 'absolute',
           bottom: 0,
           height: tabBarHeight,
           paddingTop: 10,
           paddingBottom: bottomPadding,
-          borderTopColor: 'rgba(255,255,255,0.08)',
+          borderTopColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.12)',
           borderTopWidth: 1,
-          backgroundColor: 'rgba(3,7,18,0.97)',
+          backgroundColor: isDark ? 'rgba(3,7,18,0.97)' : 'rgba(255,255,255,0.97)',
         },
         tabBarLabelStyle: {
           fontSize: 11,

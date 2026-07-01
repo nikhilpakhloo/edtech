@@ -4,8 +4,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 
+import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem } from '@/types/media';
 import { formatRuntime } from '@/utils/formatRuntime';
+import { impactHaptic } from '@/utils/haptics';
 
 type MediaCardProps = {
   item: MediaItem;
@@ -13,14 +15,24 @@ type MediaCardProps = {
 };
 
 function MediaCardBase({ item, onPress }: MediaCardProps) {
+  const { colors, isDark } = useAppTheme();
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`Open ${item.title}`}
       className="mr-3 w-32"
       style={({ pressed }) => [pressed && styles.pressed]}
-      onPress={() => onPress(item)}>
-      <View className="overflow-hidden rounded-md border border-white/10 bg-brand-elevated">
+      onPress={() => {
+        impactHaptic();
+        onPress(item);
+      }}>
+      <View
+        className="overflow-hidden rounded-md border"
+        style={{
+          backgroundColor: colors.elevated,
+          borderColor: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
+        }}>
         <Image
           source={{ uri: item.posterUrl }}
           cachePolicy="disk"
@@ -52,10 +64,10 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
           />
         ) : null}
       </View>
-      <Text numberOfLines={1} className="mt-2 text-sm font-bold text-white">
+      <Text numberOfLines={1} className="mt-2 text-sm font-bold" style={{ color: colors.text }}>
         {item.title}
       </Text>
-      <Text numberOfLines={1} className="mt-1 text-xs text-slate-400">
+      <Text numberOfLines={1} className="mt-1 text-xs" style={{ color: colors.textMuted }}>
         {item.languages[0]} - {formatRuntime(item.runtimeMinutes, item.seasonCount)}
       </Text>
     </Pressable>

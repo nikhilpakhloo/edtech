@@ -24,7 +24,9 @@ import { HomeSkeleton } from '@/components/feedback/Skeleton';
 import { MediaRail } from '@/components/media/MediaRail';
 import { Screen } from '@/components/layout/Screen';
 import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
+import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem, MediaRail as MediaRailType } from '@/types/media';
+import { impactHaptic, selectionHaptic } from '@/utils/haptics';
 import { HOME_FEED_LIST_PROPS } from '@/utils/listPerf';
 import { getTabBarContentPadding } from '@/utils/tabBar';
 
@@ -63,6 +65,7 @@ const MODE_OPTIONS: {
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const { colors } = useAppTheme();
   const [activeMode, setActiveMode] = useState<HomeMode>('learn');
   const { data, error, isLoading, isRefreshing, refresh, retry } = useHomeFeed();
 
@@ -181,7 +184,7 @@ export default function HomeScreen() {
   if (isLoading || isRefreshing) {
     return (
       <Screen edges={['left', 'right']}>
-        <View className="bg-brand-ink px-5 pt-14">
+        <View className="px-5 pt-14" style={{ backgroundColor: colors.background }}>
           <ModeButtons activeMode={activeMode} onSelectMode={setActiveMode} />
         </View>
         <HomeSkeleton />
@@ -203,12 +206,12 @@ export default function HomeScreen() {
 
   return (
     <Screen edges={['left', 'right']}>
-      <View className="bg-brand-ink px-5 pt-14">
+      <View className="px-5 pt-14" style={{ backgroundColor: colors.background }}>
         <ModeButtons activeMode={activeMode} onSelectMode={setActiveMode} />
       </View>
       <FlatList
         {...HOME_FEED_LIST_PROPS}
-        className="bg-brand-ink"
+        style={{ backgroundColor: colors.background }}
         data={modeFeed.rails}
         keyExtractor={(rail) => rail.id}
         renderItem={renderRail}
@@ -249,6 +252,7 @@ function HomeTopExperience({
   onSelectMedia,
 }: HomeTopExperienceProps) {
   const carouselRef = useRef<ICarouselInstance>(null);
+  const { colors, isDark } = useAppTheme();
 
   const renderCarouselItem = useCallback<CarouselRenderItem<MediaItem>>(
     ({ item, index }) => (
@@ -257,8 +261,16 @@ function HomeTopExperience({
         accessibilityLabel={`Open ${item.title}`}
         className="mr-4"
         style={styles.snapCardWrap}
-        onPress={() => onSelectMedia(item)}>
-        <View className="overflow-hidden rounded-lg border border-white/10 bg-brand-surface">
+        onPress={() => {
+          impactHaptic();
+          onSelectMedia(item);
+        }}>
+        <View
+          className="overflow-hidden rounded-lg border"
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
+          }}>
           <Image
             source={{ uri: item.backdropUrl }}
             cachePolicy="disk"
@@ -278,7 +290,7 @@ function HomeTopExperience({
         </View>
       </Pressable>
     ),
-    [onSelectMedia],
+    [colors.border, colors.surface, isDark, onSelectMedia],
   );
 
   return (
@@ -287,8 +299,15 @@ function HomeTopExperience({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Open ${hero.title}`}
-          className="overflow-hidden rounded-lg border border-white/10 bg-brand-surface"
-          onPress={() => onSelectMedia(hero)}>
+          className="overflow-hidden rounded-lg border"
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
+          }}
+          onPress={() => {
+            impactHaptic();
+            onSelectMedia(hero);
+          }}>
           <Image
             source={{ uri: hero.backdropUrl }}
             cachePolicy="disk"
@@ -313,8 +332,10 @@ function HomeTopExperience({
 
       <View className="mt-6">
         <View className="mb-3 px-5">
-          <Text className="text-xl font-black text-white">For You</Text>
-          <Text className="mt-1 text-sm text-slate-400">
+          <Text className="text-xl font-black" style={{ color: colors.text }}>
+            For You
+          </Text>
+          <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
             Swipe through curated {activeMode === 'learn' ? 'learning journeys' : 'practice picks'}
           </Text>
         </View>
@@ -368,7 +389,10 @@ function ModeButtons({ activeMode, onSelectMode }: ModeButtonsProps) {
             accessibilityState={{ selected: isActive }}
             className="flex-1 overflow-hidden rounded-full"
             style={isActive ? styles.modeButtonActive : styles.modeButtonIdle}
-            onPress={() => onSelectMode(option.id)}>
+            onPress={() => {
+              selectionHaptic();
+              onSelectMode(option.id);
+            }}>
             <LinearGradient
               colors={isActive ? option.activeColors : option.idleColors}
               start={{ x: 0, y: 0 }}

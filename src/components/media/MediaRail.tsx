@@ -5,7 +5,9 @@ import { FlatList, Pressable, Text, View } from 'react-native';
 
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { MediaCard } from '@/components/media/MediaCard';
+import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem, MediaRail as MediaRailType } from '@/types/media';
+import { selectionHaptic } from '@/utils/haptics';
 import { HOME_RAIL_LIST_PROPS } from '@/utils/listPerf';
 
 type MediaRailProps = {
@@ -14,11 +16,13 @@ type MediaRailProps = {
 };
 
 function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
+  const { colors } = useAppTheme();
   const renderItem = useCallback<ListRenderItem<MediaItem>>(
     ({ item }) => <MediaCard item={item} onPress={onSelectMedia} />,
     [onSelectMedia],
   );
   const handleViewAll = useCallback(() => {
+    selectionHaptic();
     router.push('/search');
   }, []);
 
@@ -26,7 +30,9 @@ function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
     return (
       <View className="mb-7">
         <View className="mb-3 px-5">
-          <Text className="text-lg font-bold text-white">{rail.title}</Text>
+          <Text className="text-lg font-bold" style={{ color: colors.text }}>
+            {rail.title}
+          </Text>
         </View>
         <EmptyState
           title="Nothing here yet"
@@ -40,9 +46,13 @@ function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
     <View className="mb-8">
       <View className="mb-3 flex-row items-end justify-between px-5">
         <View className="flex-1 pr-4">
-          <Text className="text-xl font-black text-white">{rail.title}</Text>
+          <Text className="text-xl font-black" style={{ color: colors.text }}>
+            {rail.title}
+          </Text>
           {rail.subtitle ? (
-            <Text className="mt-1 text-sm text-slate-400">{rail.subtitle}</Text>
+            <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
+              {rail.subtitle}
+            </Text>
           ) : null}
         </View>
         <Pressable

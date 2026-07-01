@@ -1,8 +1,12 @@
 import { memo } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
+import { useAppTheme } from "@/theme/AppTheme";
+
 function SkeletonBlock({ className }: { className: string }) {
-  return <View className={`bg-brand-elevated ${className}`} />;
+  const { colors } = useAppTheme();
+
+  return <View className={className} style={{ backgroundColor: colors.elevated }} />;
 }
 
 function SkeletonRail() {
@@ -30,9 +34,12 @@ function SkeletonRail() {
 }
 
 function HomeSkeletonBase() {
+  const { colors } = useAppTheme();
+
   return (
     <ScrollView
-      className="flex-1 bg-brand-ink"
+      className="flex-1"
+      style={{ backgroundColor: colors.background }}
       showsVerticalScrollIndicator={false}
     >
       <SkeletonBlock className="h-[40px] w-full" />
@@ -50,9 +57,12 @@ function HomeSkeletonBase() {
 }
 
 function DetailSkeletonBase() {
+  const { colors } = useAppTheme();
+
   return (
     <ScrollView
-      className="flex-1 bg-brand-ink"
+      className="flex-1"
+      style={{ backgroundColor: colors.background }}
       showsVerticalScrollIndicator={false}
     >
       <SkeletonBlock className="h-[430px] w-full" />
@@ -69,9 +79,12 @@ function DetailSkeletonBase() {
 }
 
 function SearchSkeletonBase() {
+  const { colors } = useAppTheme();
+
   return (
     <ScrollView
-      className="flex-1 bg-brand-ink"
+      className="flex-1"
+      style={{ backgroundColor: colors.background }}
       showsVerticalScrollIndicator={false}
     >
       <View className="px-5 pb-5 pt-14">

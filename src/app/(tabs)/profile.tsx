@@ -7,7 +7,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Screen } from '@/components/layout/Screen';
 import { apiService } from '@/data/apiService';
+import { useAppTheme } from '@/theme/AppTheme';
 import type { ProfileResponse } from '@/types/media';
+import { selectionHaptic } from '@/utils/haptics';
 import { getTabBarContentPadding } from '@/utils/tabBar';
 
 const learnerStats = [
@@ -55,6 +57,7 @@ const settingIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const { colors, isDark } = useAppTheme();
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
 
   useEffect(() => {
@@ -84,9 +87,10 @@ export default function ProfileScreen() {
   return (
     <Screen edges={['top', 'left', 'right']}>
       <ScrollView
-        className="flex-1 bg-brand-ink"
+        className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
+          backgroundColor: colors.background,
           paddingBottom: getTabBarContentPadding(insets.bottom),
           paddingHorizontal: 20,
           paddingTop: 18,
@@ -95,8 +99,10 @@ export default function ProfileScreen() {
           <Text className="text-[13px] font-black uppercase tracking-[2px] text-brand-cyan">
             Your learning hub
           </Text>
-          <Text className="mt-1 text-3xl font-black text-white">My Space</Text>
-          <Text className="mt-2 text-sm leading-5 text-slate-400">
+          <Text className="mt-1 text-3xl font-black" style={{ color: colors.text }}>
+            My Space
+          </Text>
+          <Text className="mt-2 text-sm leading-5" style={{ color: colors.textMuted }}>
             Track progress, manage downloads, and tune your EdStream experience.
           </Text>
         </View>
@@ -125,7 +131,8 @@ export default function ProfileScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Edit profile"
-              className="h-10 w-10 items-center justify-center rounded-full bg-white/10">
+              className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
+              onPress={selectionHaptic}>
               <Ionicons name="create-outline" color="#FFFFFF" size={20} />
             </Pressable>
           </View>
@@ -153,7 +160,8 @@ export default function ProfileScreen() {
               key={action.id}
               accessibilityRole="button"
               accessibilityLabel={action.label}
-              className="flex-1 overflow-hidden rounded-lg">
+              className="flex-1 overflow-hidden rounded-lg"
+              onPress={selectionHaptic}>
               <LinearGradient colors={action.colors} style={styles.quickAction}>
                 <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
                   <Ionicons name={action.icon} color="#FFFFFF" size={22} />
@@ -170,17 +178,32 @@ export default function ProfileScreen() {
         </View>
 
         <View className="mt-7">
-          <Text className="text-xl font-black text-white">Preferences</Text>
-          <Text className="mt-1 text-sm text-slate-400">
+          <Text className="text-xl font-black" style={{ color: colors.text }}>
+            Preferences
+          </Text>
+          <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
             Personalize playback, language, and downloads.
           </Text>
         </View>
 
-        <View className="mt-4 overflow-hidden rounded-lg border border-white/10 bg-brand-surface">
-          {profile.settings.map((setting) => (
+        <View
+          className="mt-4 overflow-hidden rounded-lg border"
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
+          }}>
+          {profile.settings.map((setting, index) => (
             <View
               key={setting.id}
-              className="flex-row items-center border-b border-white/10 px-4 py-4 last:border-b-0">
+              className="flex-row items-center border-b px-4 py-4"
+              style={{
+                borderBottomColor:
+                  index === profile.settings.length - 1
+                    ? 'transparent'
+                    : isDark
+                      ? 'rgba(255,255,255,0.1)'
+                      : colors.border,
+              }}>
               <View className="h-11 w-11 items-center justify-center rounded-full bg-brand-blue/15">
                 <Ionicons
                   name={settingIcons[setting.id] ?? 'settings-outline'}
@@ -190,12 +213,16 @@ export default function ProfileScreen() {
               </View>
               <View className="ml-3 flex-1">
                 <View className="flex-row items-center">
-                  <Text className="flex-1 text-base font-bold text-white">{setting.title}</Text>
+                  <Text className="flex-1 text-base font-bold" style={{ color: colors.text }}>
+                    {setting.title}
+                  </Text>
                   {typeof setting.enabled !== 'boolean' ? (
                     <Text className="ml-2 text-sm font-black text-brand-cyan">{setting.value}</Text>
                   ) : null}
                 </View>
-                <Text className="mt-1 text-sm leading-5 text-slate-400">{setting.description}</Text>
+                <Text className="mt-1 text-sm leading-5" style={{ color: colors.textMuted }}>
+                  {setting.description}
+                </Text>
               </View>
               {typeof setting.enabled === 'boolean' ? (
                 <Switch color="#1F80E0" value={setting.enabled} />
@@ -204,14 +231,21 @@ export default function ProfileScreen() {
           ))}
         </View>
 
-        <View className="mt-6 rounded-lg border border-white/10 bg-brand-elevated p-4">
+        <View
+          className="mt-6 rounded-lg border p-4"
+          style={{
+            backgroundColor: colors.elevated,
+            borderColor: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
+          }}>
           <View className="flex-row items-center">
             <View className="h-11 w-11 items-center justify-center rounded-full bg-brand-gold/15">
               <Ionicons name="flame-outline" color="#F5C542" size={23} />
             </View>
             <View className="ml-3 flex-1">
-              <Text className="text-base font-black text-white">Keep your streak alive</Text>
-              <Text className="mt-1 text-sm leading-5 text-slate-400">
+              <Text className="text-base font-black" style={{ color: colors.text }}>
+                Keep your streak alive
+              </Text>
+              <Text className="mt-1 text-sm leading-5" style={{ color: colors.textMuted }}>
                 Finish one lesson today to unlock your next weekly milestone.
               </Text>
             </View>

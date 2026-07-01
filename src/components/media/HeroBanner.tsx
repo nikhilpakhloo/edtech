@@ -6,15 +6,19 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
 
 import { MetadataPill } from '@/components/media/MetadataPill';
+import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem } from '@/types/media';
 import { formatRuntime } from '@/utils/formatRuntime';
+import { impactHaptic } from '@/utils/haptics';
 
 type HeroBannerProps = {
   item: MediaItem;
 };
 
 function HeroBannerBase({ item }: HeroBannerProps) {
+  const { colors, isDark } = useAppTheme();
   const handleOpen = useCallback(() => {
+    impactHaptic();
     router.push({
       pathname: '/detail/[mediaId]',
       params: { mediaId: item.id },
@@ -23,7 +27,9 @@ function HeroBannerBase({ item }: HeroBannerProps) {
 
   return (
     <View className="mb-8">
-      <View className="h-[560px] overflow-hidden bg-brand-surface">
+      <View
+        className="h-[560px] overflow-hidden"
+        style={{ backgroundColor: colors.surface }}>
         <Image
           source={{ uri: item.backdropUrl }}
           cachePolicy="disk"
@@ -34,15 +40,23 @@ function HeroBannerBase({ item }: HeroBannerProps) {
         />
         <View className="absolute inset-0 bg-black/10" />
         <View className="absolute left-0 top-0 h-56 w-28 bg-brand-ink/75" />
-        <View className="absolute bottom-0 left-0 right-0 h-96 bg-brand-ink/95" />
-        <View className="absolute bottom-28 left-0 right-0 h-28 bg-brand-surface/55" />
+        <View
+          className="absolute bottom-0 left-0 right-0 h-96"
+          style={{ backgroundColor: isDark ? 'rgba(3,7,18,0.95)' : 'rgba(255,255,255,0.9)' }}
+        />
+        <View
+          className="absolute bottom-28 left-0 right-0 h-28"
+          style={{ backgroundColor: isDark ? 'rgba(7,16,31,0.55)' : 'rgba(255,255,255,0.55)' }}
+        />
 
         <View className="absolute left-5 right-5 top-14 flex-row items-center">
           <View className="h-10 w-10 items-center justify-center rounded-lg bg-white">
             <Text className="text-lg font-black text-brand-blue">E</Text>
           </View>
           <View className="ml-3 flex-1">
-            <Text className="text-xl font-black text-white">EdStream</Text>
+            <Text className="text-xl font-black" style={{ color: colors.text }}>
+              EdStream
+            </Text>
             <Text className="text-xs font-bold uppercase tracking-[2px] text-brand-cyan">
               Learn like cinema
             </Text>
@@ -66,7 +80,7 @@ function HeroBannerBase({ item }: HeroBannerProps) {
               {item.eyebrow}
             </Text>
           </View>
-          <Text className="text-5xl font-black text-white" numberOfLines={2}>
+          <Text className="text-5xl font-black" numberOfLines={2} style={{ color: colors.text }}>
             {item.title}
           </Text>
           <View className="mt-4 flex-row flex-wrap">
@@ -75,7 +89,7 @@ function HeroBannerBase({ item }: HeroBannerProps) {
             <MetadataPill label={item.rating} />
             <MetadataPill label={formatRuntime(item.runtimeMinutes, item.seasonCount)} />
           </View>
-          <Text numberOfLines={3} className="mt-4 text-base leading-6 text-slate-200">
+          <Text numberOfLines={3} className="mt-4 text-base leading-6" style={{ color: colors.text }}>
             {item.description}
           </Text>
           <View className="mt-6 flex-row gap-3">

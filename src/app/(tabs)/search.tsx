@@ -10,11 +10,14 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { SearchSkeleton } from '@/components/feedback/Skeleton';
 import { MediaCard } from '@/components/media/MediaCard';
 import { apiService } from '@/data/apiService';
+import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem } from '@/types/media';
+import { selectionHaptic } from '@/utils/haptics';
 import { getTabBarContentPadding } from '@/utils/tabBar';
 
 export default function SearchScreen() {
   const insets = useSafeAreaInsets();
+  const { colors, isDark } = useAppTheme();
   const [query, setQuery] = useState('');
   const [items, setItems] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -138,28 +141,41 @@ export default function SearchScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 bg-brand-ink px-5 pt-16">
+      <View className="flex-1 px-5 pt-16" style={{ backgroundColor: colors.background }}>
         <ErrorState title="Search unavailable" message={error} onRetry={() => setError(null)} />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-brand-ink">
-      <View className="border-b border-white/5 bg-brand-ink px-5 pb-5 pt-14">
-        <Text className="text-3xl font-black text-white">Search</Text>
-        <Text className="mt-1 text-sm font-semibold text-slate-400">
+    <View className="flex-1" style={{ backgroundColor: colors.background }}>
+      <View
+        className="border-b px-5 pb-5 pt-14"
+        style={{
+          backgroundColor: colors.background,
+          borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.1)',
+        }}>
+        <Text className="text-3xl font-black" style={{ color: colors.text }}>
+          Search
+        </Text>
+        <Text className="mt-1 text-sm font-semibold" style={{ color: colors.textMuted }}>
           Find lessons, live challenges, documentaries, and exam tracks.
         </Text>
 
-        <View className="mt-5 flex-row items-center rounded-lg border border-white/10 bg-brand-surface px-4">
+        <View
+          className="mt-5 flex-row items-center rounded-lg border px-4"
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
+          }}>
           <Ionicons name="search" color="#9AA7BC" size={20} />
           <TextInput
             value={query}
             onChangeText={setQuery}
             placeholder="Search by title, skill, language..."
             placeholderTextColor="#64748B"
-            className="ml-3 h-12 flex-1 text-base font-semibold text-white"
+            className="ml-3 h-12 flex-1 text-base font-semibold"
+            style={{ color: colors.text }}
             autoCapitalize="none"
             autoCorrect={false}
           />
@@ -168,7 +184,10 @@ export default function SearchScreen() {
               accessibilityRole="button"
               accessibilityLabel="Clear search"
               className="h-9 w-9 items-center justify-center"
-              onPress={() => setQuery('')}>
+              onPress={() => {
+                selectionHaptic();
+                setQuery('');
+              }}>
               <Ionicons name="close-circle" color="#9AA7BC" size={20} />
             </Pressable>
           ) : null}
@@ -184,7 +203,7 @@ export default function SearchScreen() {
         {query.trim() ? (
           filteredItems.length ? (
             <View className="pt-5">
-              <Text className="mb-4 px-5 text-sm font-bold text-slate-300">
+              <Text className="mb-4 px-5 text-sm font-bold" style={{ color: colors.textMuted }}>
                 {`Showing results for "${query.trim()}"`}
               </Text>
               <SearchRail
@@ -196,7 +215,7 @@ export default function SearchScreen() {
             </View>
           ) : (
             <View className="px-5 pt-10">
-              <Text className="mb-4 text-sm font-bold text-slate-300">
+              <Text className="mb-4 text-sm font-bold" style={{ color: colors.textMuted }}>
                 {`Showing results for "${query.trim()}"`}
               </Text>
               <EmptyState
@@ -231,11 +250,17 @@ type SearchRailProps = {
 };
 
 function SearchRail({ title, subtitle, items, renderItem }: SearchRailProps) {
+  const { colors } = useAppTheme();
+
   return (
     <View className="mb-8">
       <View className="mb-3 px-5">
-        <Text className="text-xl font-black text-white">{title}</Text>
-        <Text className="mt-1 text-sm text-slate-400">{subtitle}</Text>
+        <Text className="text-xl font-black" style={{ color: colors.text }}>
+          {title}
+        </Text>
+        <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
+          {subtitle}
+        </Text>
       </View>
       <FlatList
         data={items}

@@ -7,6 +7,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useAppTheme } from "@/theme/AppTheme";
+
 type DetailAnimatedHeaderProps = {
   title: string;
   scrollY: SharedValue<number>;
@@ -17,6 +19,7 @@ export function DetailAnimatedHeader({
   scrollY,
 }: DetailAnimatedHeaderProps) {
   const insets = useSafeAreaInsets();
+  const { colors, isDark } = useAppTheme();
   const expandedHeight = insets.top + 56;
 
   const idleStyle = useAnimatedStyle(() => {
@@ -61,13 +64,19 @@ export function DetailAnimatedHeader({
 
   return (
     <Animated.View
-      className="overflow-hidden bg-brand-ink"
-      style={{ height: expandedHeight }}
+      className="overflow-hidden"
+      style={{ backgroundColor: colors.background, height: expandedHeight }}
     >
       <Animated.View
         pointerEvents="none"
-        className="absolute inset-0 border-b border-white/5 bg-brand-ink px-5"
-        style={idleStyle}
+        className="absolute inset-0 border-b px-5"
+        style={[
+          idleStyle,
+          {
+            backgroundColor: colors.background,
+            borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(15,23,42,0.1)",
+          },
+        ]}
       >
         <View
           className="flex-row items-center"
@@ -77,7 +86,9 @@ export function DetailAnimatedHeader({
             <Text className="text-base font-black text-brand-blue">E</Text>
           </View>
           <View className="ml-3 flex-1">
-            <Text className="text-sm font-black text-white">EdStream</Text>
+            <Text className="text-sm font-black" style={{ color: colors.text }}>
+              EdStream
+            </Text>
             <Text className="mt-0.5 text-[11px] font-bold uppercase tracking-[1.6px] text-brand-cyan">
               Now watching
             </Text>
@@ -86,13 +97,19 @@ export function DetailAnimatedHeader({
       </Animated.View>
       <Animated.View
         pointerEvents="none"
-        className="h-full border-b border-white/10 bg-brand-ink/90 px-5"
-        style={headerStyle}
+        className="h-full border-b px-5"
+        style={[
+          headerStyle,
+          {
+            backgroundColor: isDark ? "rgba(3,7,18,0.94)" : "rgba(255,255,255,0.94)",
+            borderBottomColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(15,23,42,0.12)",
+          },
+        ]}
       >
         <Text
           numberOfLines={1}
-          className="text-xl font-black text-white"
-          style={{ paddingTop: insets.top + 18 }}
+          className="text-xl font-black"
+          style={{ color: colors.text, paddingTop: insets.top + 18 }}
         >
           {title}
         </Text>
