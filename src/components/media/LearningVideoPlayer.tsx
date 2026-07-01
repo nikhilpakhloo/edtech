@@ -40,7 +40,7 @@ function LearningVideoPlayerBase({ title, videoUrl, streamType }: LearningVideoP
   }, [isPlaying, player]);
 
   return (
-    <View className="overflow-hidden rounded-lg border border-brand-line bg-black">
+    <View className="overflow-hidden rounded-lg border border-white/10 bg-black">
       <VideoView
         player={player}
         nativeControls
@@ -62,6 +62,7 @@ function LearningVideoPlayerBase({ title, videoUrl, streamType }: LearningVideoP
           compact
           buttonColor="#4F8CFF"
           textColor="#FFFFFF"
+          labelStyle={{ fontWeight: '900' }}
           onPress={handleTogglePlayback}>
           {isPlaying ? 'Pause' : 'Play'}
         </Button>

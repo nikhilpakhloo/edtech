@@ -753,3 +753,18 @@ eas build --platform android --profile preview
 - Screenshots or screen recording of Home, Detail, Profile, loading, empty, and error states.
 - Walkthrough video with audible explanation of implementation and key decisions.
 - Expo Go link or APK build link.
+
+### 11. Native Rebuild Notes
+
+This project uses config plugins for `expo-video` and `expo-build-properties`. After changing native plugin config, regenerate Android before running a development build:
+
+```bash
+npx expo prebuild --platform android --clean
+npx expo run:android
+```
+
+For Metro cache issues after NativeWind or Babel changes:
+
+```bash
+npx expo start -c
+```

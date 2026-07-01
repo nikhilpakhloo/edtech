@@ -17,8 +17,9 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
       accessibilityRole="button"
       accessibilityLabel={`Open ${item.title}`}
       className="mr-3 w-32"
+      style={({ pressed }) => [pressed && styles.pressed]}
       onPress={() => onPress(item)}>
-      <View className="overflow-hidden rounded-md bg-brand-elevated">
+      <View className="overflow-hidden rounded-md border border-white/5 bg-brand-elevated">
         <Image
           source={{ uri: item.posterUrl }}
           cachePolicy="disk"
@@ -28,10 +29,11 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
           style={styles.poster}
         />
         {item.isPremium ? (
-          <View className="absolute left-2 top-2 rounded bg-black/70 px-2 py-1">
+          <View className="absolute left-2 top-2 rounded bg-black/75 px-2 py-1">
             <Text className="text-[10px] font-bold uppercase text-brand-green">Premium</Text>
           </View>
         ) : null}
+        <View className="absolute bottom-0 left-0 right-0 h-12 bg-black/30" />
         {item.progressPercent ? (
           <ProgressBar
             progress={item.progressPercent}
@@ -51,6 +53,10 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
 }
 
 const styles = StyleSheet.create({
+  pressed: {
+    opacity: 0.78,
+    transform: [{ scale: 0.98 }],
+  },
   poster: {
     height: 188,
     width: 128,

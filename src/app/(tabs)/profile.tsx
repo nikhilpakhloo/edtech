@@ -73,6 +73,17 @@ export default function ProfileScreen() {
             />
           ))}
         </View>
+        <View className="mt-6 rounded-lg border border-white/10 bg-brand-elevated p-4">
+          <Text className="text-sm font-black uppercase tracking-[1.5px] text-brand-green">
+            Submission Build
+          </Text>
+          <Text className="mt-2 text-base font-bold text-white">
+            Expo Router, NativeWind, React Native Paper, expo-image, and expo-video are enabled.
+          </Text>
+          <Text className="mt-2 text-sm leading-6 text-slate-400">
+            Capture Home, Detail playback, Profile, loading, refresh, and error states for the final walkthrough.
+          </Text>
+        </View>
       </ScrollView>
     </Screen>
   );
