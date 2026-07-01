@@ -7,8 +7,8 @@ type MetadataPillProps = {
 
 function MetadataPillBase({ label }: MetadataPillProps) {
   return (
-    <View className="mr-2 rounded-full border border-brand-line bg-brand-elevated px-3 py-1">
-      <Text className="text-xs font-semibold text-slate-200">{label}</Text>
+    <View className="mb-2 mr-2 rounded-full border border-white/10 bg-white/10 px-3 py-1">
+      <Text className="text-xs font-bold text-slate-100">{label}</Text>
     </View>
   );
 }

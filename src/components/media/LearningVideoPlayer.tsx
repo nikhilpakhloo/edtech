@@ -1,80 +1,114 @@
-import { useEvent } from 'expo';
-import { useVideoPlayer, VideoView } from 'expo-video';
-import { memo, useCallback } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Button } from 'react-native-paper';
+import { Ionicons } from "@expo/vector-icons";
+import { useEvent } from "expo";
+import { Image } from "expo-image";
+import { useVideoPlayer, VideoView } from "expo-video";
+import { memo, useCallback, useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 
-import type { StreamType } from '@/types/media';
+import type { StreamType } from "@/types/media";
 
 type LearningVideoPlayerProps = {
   title: string;
   videoUrl: string;
   streamType: StreamType;
+  posterUrl?: string;
+  autoPlay?: boolean;
+  elevated?: boolean;
+  controlsTop?: number;
 };
 
-function LearningVideoPlayerBase({ title, videoUrl, streamType }: LearningVideoPlayerProps) {
+function LearningVideoPlayerBase({
+  title,
+  videoUrl,
+  streamType,
+  posterUrl,
+  autoPlay = false,
+  elevated = false,
+  controlsTop = 16,
+}: LearningVideoPlayerProps) {
+  const [hasFirstFrame, setHasFirstFrame] = useState(false);
   const player = useVideoPlayer(
     {
       uri: videoUrl,
+      contentType: streamType === "hls" ? "hls" : "auto",
       metadata: {
         title,
-        artist: 'EdStream',
+        artist: "EdStream",
+        artwork: posterUrl,
       },
-      useCaching: streamType === 'mp4',
+      useCaching: streamType === "mp4",
     },
     (playerInstance) => {
       playerInstance.loop = false;
+      playerInstance.muted = autoPlay;
+      playerInstance.timeUpdateEventInterval = 1;
+
+      if (autoPlay) {
+        playerInstance.play();
+      }
     },
   );
-  const { isPlaying } = useEvent(player, 'playingChange', {
-    isPlaying: player.playing,
+  const { muted } = useEvent(player, "mutedChange", {
+    muted: player.muted,
   });
 
-  const handleTogglePlayback = useCallback(() => {
-    if (isPlaying) {
-      player.pause();
-      return;
-    }
-
-    player.play();
-  }, [isPlaying, player]);
+  const handleToggleMute = useCallback(() => {
+    // expo-video exposes mute as a mutable player control.
+    // eslint-disable-next-line react-hooks/immutability
+    player.muted = !player.muted;
+  }, [player]);
 
   return (
-    <View className="overflow-hidden rounded-lg border border-white/10 bg-black">
+    <View
+      className={
+        elevated
+          ? "overflow-hidden rounded-b-lg border-b border-white/10 bg-black"
+          : "overflow-hidden rounded-lg border border-white/10 bg-black"
+      }
+    >
       <VideoView
         player={player}
         nativeControls
-        fullscreenOptions={{ enable: true }}
+        fullscreenOptions={{ enable: true, orientation: "landscape" }}
         allowsPictureInPicture
+        playsInline
         contentFit="cover"
         surfaceType="textureView"
+        onFirstFrameRender={() => setHasFirstFrame(true)}
         style={styles.video}
       />
-      <View className="flex-row items-center justify-between bg-brand-surface px-4 py-3">
-        <View className="flex-1 pr-3">
-          <Text className="text-sm font-bold text-white">Now Playing</Text>
-          <Text numberOfLines={1} className="mt-1 text-xs text-slate-400">
-            {title} - {streamType.toUpperCase()}
-          </Text>
-        </View>
-        <Button
-          mode="contained"
-          compact
-          buttonColor="#4F8CFF"
-          textColor="#FFFFFF"
-          labelStyle={{ fontWeight: '900' }}
-          onPress={handleTogglePlayback}>
-          {isPlaying ? 'Pause' : 'Play'}
-        </Button>
-      </View>
+      {posterUrl && !hasFirstFrame ? (
+        <Image
+          source={{ uri: posterUrl }}
+          cachePolicy="disk"
+          contentFit="cover"
+          style={[StyleSheet.absoluteFill, styles.poster]}
+        />
+      ) : null}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={muted ? "Unmute video" : "Mute video"}
+        className="absolute right-4 h-11 w-11 items-center justify-center rounded-full bg-black/65"
+        style={{ top: controlsTop }}
+        onPress={handleToggleMute}
+      >
+        <Ionicons
+          name={muted ? "volume-mute" : "volume-high"}
+          color="#FFFFFF"
+          size={20}
+        />
+      </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   video: {
-    aspectRatio: 16 / 9,
-    width: '100%',
+    height: 280,
+    width: "100%",
+  },
+  poster: {
+    opacity: 0.92,
   },
 });
 

@@ -1,27 +1,57 @@
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
   useAnimatedStyle,
   type SharedValue,
-} from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-import { colors } from '@/theme/tokens';
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type DetailAnimatedHeaderProps = {
   title: string;
   scrollY: SharedValue<number>;
 };
 
-export function DetailAnimatedHeader({ title, scrollY }: DetailAnimatedHeaderProps) {
+export function DetailAnimatedHeader({
+  title,
+  scrollY,
+}: DetailAnimatedHeaderProps) {
   const insets = useSafeAreaInsets();
+  const expandedHeight = insets.top + 56;
+
+  const idleStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      scrollY.value,
+      [0, 54],
+      [1, 0],
+      Extrapolation.CLAMP,
+    );
+    const translateY = interpolate(
+      scrollY.value,
+      [0, 54],
+      [0, -6],
+      Extrapolation.CLAMP,
+    );
+
+    return {
+      opacity,
+      transform: [{ translateY }],
+    };
+  });
 
   const headerStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(scrollY.value, [120, 220], [0, 1], Extrapolation.CLAMP);
-    const translateY = interpolate(scrollY.value, [120, 220], [-8, 0], Extrapolation.CLAMP);
+    const opacity = interpolate(
+      scrollY.value,
+      [28, 88],
+      [0, 1],
+      Extrapolation.CLAMP,
+    );
+    const translateY = interpolate(
+      scrollY.value,
+      [28, 88],
+      [-8, 0],
+      Extrapolation.CLAMP,
+    );
 
     return {
       opacity,
@@ -31,20 +61,42 @@ export function DetailAnimatedHeader({ title, scrollY }: DetailAnimatedHeaderPro
 
   return (
     <Animated.View
-      className="absolute left-0 right-0 top-0 z-20 border-b border-brand-line bg-brand-ink/95 px-4"
-      style={[{ paddingTop: insets.top + 8, paddingBottom: 12 }, headerStyle]}>
-      <View className="flex-row items-center">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
-          onPress={() => router.back()}>
-          <Ionicons name="chevron-back" color={colors.dark.text} size={24} />
-        </Pressable>
-        <Text numberOfLines={1} className="ml-3 flex-1 text-base font-black text-white">
+      className="overflow-hidden bg-brand-ink"
+      style={{ height: expandedHeight }}
+    >
+      <Animated.View
+        pointerEvents="none"
+        className="absolute inset-0 border-b border-white/5 bg-brand-ink px-5"
+        style={idleStyle}
+      >
+        <View
+          className="flex-row items-center"
+          style={{ paddingTop: insets.top + 14 }}
+        >
+          <View className="h-8 w-8 items-center justify-center rounded-md bg-white">
+            <Text className="text-base font-black text-brand-blue">E</Text>
+          </View>
+          <View className="ml-3 flex-1">
+            <Text className="text-sm font-black text-white">EdStream</Text>
+            <Text className="mt-0.5 text-[11px] font-bold uppercase tracking-[1.6px] text-brand-cyan">
+              Now watching
+            </Text>
+          </View>
+        </View>
+      </Animated.View>
+      <Animated.View
+        pointerEvents="none"
+        className="h-full border-b border-white/10 bg-brand-ink/90 px-5"
+        style={headerStyle}
+      >
+        <Text
+          numberOfLines={1}
+          className="text-xl font-black text-white"
+          style={{ paddingTop: insets.top + 18 }}
+        >
           {title}
         </Text>
-      </View>
+      </Animated.View>
     </Animated.View>
   );
 }

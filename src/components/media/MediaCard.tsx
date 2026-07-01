@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
+import { Ionicons } from '@expo/vector-icons';
 
 import type { MediaItem } from '@/types/media';
 import { formatRuntime } from '@/utils/formatRuntime';
@@ -19,7 +20,7 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
       className="mr-3 w-32"
       style={({ pressed }) => [pressed && styles.pressed]}
       onPress={() => onPress(item)}>
-      <View className="overflow-hidden rounded-md border border-white/5 bg-brand-elevated">
+      <View className="overflow-hidden rounded-md border border-white/10 bg-brand-elevated">
         <Image
           source={{ uri: item.posterUrl }}
           cachePolicy="disk"
@@ -29,15 +30,24 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
           style={styles.poster}
         />
         {item.isPremium ? (
-          <View className="absolute left-2 top-2 rounded bg-black/75 px-2 py-1">
-            <Text className="text-[10px] font-bold uppercase text-brand-green">Premium</Text>
+          <View className="absolute left-2 top-2 flex-row items-center rounded bg-brand-gold px-2 py-1">
+            <Ionicons name="flash" color="#030712" size={10} />
+            <Text className="ml-1 text-[10px] font-black uppercase text-brand-ink">VIP</Text>
           </View>
         ) : null}
-        <View className="absolute bottom-0 left-0 right-0 h-12 bg-black/30" />
+        {item.isTrending ? (
+          <View className="absolute right-2 top-2 rounded-full bg-brand-blue px-2 py-1">
+            <Text className="text-[10px] font-black uppercase text-white">Top</Text>
+          </View>
+        ) : null}
+        <View className="absolute bottom-0 left-0 right-0 h-16 bg-black/45" />
+        <View className="absolute bottom-3 left-2 h-7 w-7 items-center justify-center rounded-full bg-white/90">
+          <Ionicons name="play" color="#030712" size={13} />
+        </View>
         {item.progressPercent ? (
           <ProgressBar
             progress={item.progressPercent}
-            color="#4F8CFF"
+            color="#1F80E0"
             style={styles.progress}
           />
         ) : null}
@@ -46,7 +56,7 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
         {item.title}
       </Text>
       <Text numberOfLines={1} className="mt-1 text-xs text-slate-400">
-        {item.releaseYear} - {formatRuntime(item.runtimeMinutes, item.seasonCount)}
+        {item.languages[0]} - {formatRuntime(item.runtimeMinutes, item.seasonCount)}
       </Text>
     </Pressable>
   );

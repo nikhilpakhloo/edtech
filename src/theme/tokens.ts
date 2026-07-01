@@ -1,14 +1,15 @@
 export const colors = {
   dark: {
-    background: '#05070D',
-    surface: '#10141F',
-    elevated: '#171D2A',
-    surfaceVariant: '#20283A',
-    border: '#2B3445',
+    background: '#030712',
+    surface: '#07101F',
+    elevated: '#0D1830',
+    surfaceVariant: '#142345',
+    border: '#24314F',
     text: '#F8FAFC',
-    textMuted: '#AAB4C5',
-    primary: '#4F8CFF',
-    secondary: '#12B981',
+    textMuted: '#9AA7BC',
+    primary: '#1F80E0',
+    secondary: '#00E0FF',
+    accent: '#F5C542',
     danger: '#FF5A66',
   },
   light: {
@@ -21,6 +22,7 @@ export const colors = {
     textMuted: '#667085',
     primary: '#275DFF',
     secondary: '#047857',
+    accent: '#B7791F',
     danger: '#D92D20',
   },
 } as const;

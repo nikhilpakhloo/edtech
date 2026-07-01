@@ -1,7 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router, type Href } from 'expo-router';
 import { memo, useCallback } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
 
 import { MetadataPill } from '@/components/media/MetadataPill';
@@ -22,7 +23,7 @@ function HeroBannerBase({ item }: HeroBannerProps) {
 
   return (
     <View className="mb-8">
-      <View className="h-[470px] overflow-hidden bg-brand-surface">
+      <View className="h-[560px] overflow-hidden bg-brand-surface">
         <Image
           source={{ uri: item.backdropUrl }}
           cachePolicy="disk"
@@ -31,14 +32,45 @@ function HeroBannerBase({ item }: HeroBannerProps) {
           transition={220}
           style={StyleSheet.absoluteFill}
         />
-        <View className="absolute inset-0 bg-black/20" />
-        <View className="absolute bottom-0 left-0 right-0 h-72 bg-brand-ink/95" />
+        <View className="absolute inset-0 bg-black/10" />
+        <View className="absolute left-0 top-0 h-56 w-28 bg-brand-ink/75" />
+        <View className="absolute bottom-0 left-0 right-0 h-96 bg-brand-ink/95" />
+        <View className="absolute bottom-28 left-0 right-0 h-28 bg-brand-surface/55" />
+
+        <View className="absolute left-5 right-5 top-14 flex-row items-center">
+          <View className="h-10 w-10 items-center justify-center rounded-lg bg-white">
+            <Text className="text-lg font-black text-brand-blue">E</Text>
+          </View>
+          <View className="ml-3 flex-1">
+            <Text className="text-xl font-black text-white">EdStream</Text>
+            <Text className="text-xs font-bold uppercase tracking-[2px] text-brand-cyan">
+              Learn like cinema
+            </Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Search"
+            className="h-10 w-10 items-center justify-center rounded-full bg-black/45">
+            <Ionicons name="search" color="#FFFFFF" size={20} />
+          </Pressable>
+        </View>
+
         <View className="absolute bottom-0 left-0 right-0 px-5 pb-7">
-          <Text className="text-xs font-bold uppercase tracking-[2px] text-brand-green">
-            {item.eyebrow}
+          <View className="mb-3 flex-row items-center">
+            <View className="rounded bg-brand-gold px-2 py-1">
+              <Text className="text-[10px] font-black uppercase text-brand-ink">
+                Spotlight
+              </Text>
+            </View>
+            <Text className="ml-2 text-xs font-bold uppercase tracking-[2px] text-brand-cyan">
+              {item.eyebrow}
+            </Text>
+          </View>
+          <Text className="text-5xl font-black text-white" numberOfLines={2}>
+            {item.title}
           </Text>
-          <Text className="mt-2 text-4xl font-black text-white">{item.title}</Text>
-          <View className="mt-3 flex-row flex-wrap">
+          <View className="mt-4 flex-row flex-wrap">
+            <Text className="mr-3 text-sm font-black text-brand-gold">Premium</Text>
             <MetadataPill label={`${item.releaseYear}`} />
             <MetadataPill label={item.rating} />
             <MetadataPill label={formatRuntime(item.runtimeMinutes, item.seasonCount)} />
@@ -53,17 +85,19 @@ function HeroBannerBase({ item }: HeroBannerProps) {
               textColor="#05070D"
               contentStyle={{ height: 46, paddingHorizontal: 10 }}
               labelStyle={{ fontSize: 14, fontWeight: '900' }}
+              icon="play"
               onPress={handleOpen}>
               {item.primaryActionLabel}
             </Button>
             <Button
               mode="contained-tonal"
-              buttonColor="rgba(255,255,255,0.14)"
+              buttonColor="rgba(31,128,224,0.28)"
               textColor="#F8FAFC"
               contentStyle={{ height: 46, paddingHorizontal: 8 }}
               labelStyle={{ fontSize: 14, fontWeight: '800' }}
+              icon="plus"
               onPress={handleOpen}>
-              Details
+              Watchlist
             </Button>
           </View>
         </View>

@@ -33,12 +33,17 @@ function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
   }
 
   return (
-    <View className="mb-7">
-      <View className="mb-3 px-5">
-        <Text className="text-lg font-bold text-white">{rail.title}</Text>
-        {rail.subtitle ? (
-          <Text className="mt-1 text-sm text-slate-400">{rail.subtitle}</Text>
-        ) : null}
+    <View className="mb-8">
+      <View className="mb-3 flex-row items-end justify-between px-5">
+        <View className="flex-1 pr-4">
+          <Text className="text-xl font-black text-white">{rail.title}</Text>
+          {rail.subtitle ? (
+            <Text className="mt-1 text-sm text-slate-400">{rail.subtitle}</Text>
+          ) : null}
+        </View>
+        <Text className="text-xs font-black uppercase tracking-[1.5px] text-brand-blue">
+          View all
+        </Text>
       </View>
       <FlatList
         {...HOME_RAIL_LIST_PROPS}

@@ -33,13 +33,13 @@ export default function TabLayout() {
           height: tabBarHeight,
           paddingTop: 10,
           paddingBottom: bottomPadding,
-          borderTopColor: colors.dark.border,
+          borderTopColor: 'rgba(255,255,255,0.08)',
           borderTopWidth: 1,
-          backgroundColor: colors.dark.surface,
+          backgroundColor: 'rgba(3,7,18,0.97)',
         },
         tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
+          fontSize: 11,
+          fontWeight: '800',
         },
       }}>
       <Tabs.Screen
@@ -54,9 +54,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: 'My Space',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-circle" color={String(color)} size={size + 3} />
+            <Ionicons name="person" color={String(color)} size={size + 1} />
           ),
         }}
       />
