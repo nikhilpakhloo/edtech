@@ -215,6 +215,224 @@ const mediaItems: MediaItem[] = [
     maturityNote: 'Academic preparation',
     primaryActionLabel: 'Start Plan',
   },
+  {
+    id: 'physics-studio',
+    title: 'Physics Studio',
+    eyebrow: 'Concept Lab',
+    description:
+      'Visual experiments explain motion, electricity, waves, and modern physics with classroom-friendly demonstrations.',
+    kind: 'series',
+    posterUrl:
+      'https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?q=80&w=600&auto=format&fit=crop',
+    backdropUrl:
+      'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    trailerUrl:
+      'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    streamType: 'hls',
+    genres: ['Physics', 'Science', 'Concepts'],
+    languages: ['English', 'Hindi'],
+    rating: 'U',
+    releaseYear: 2026,
+    seasonCount: 1,
+    episodeCount: 14,
+    isPremium: false,
+    isTrending: true,
+    maturityNote: 'Suitable for school learners',
+    primaryActionLabel: 'Start Lab',
+  },
+  {
+    id: 'chemistry-kitchen',
+    title: 'Chemistry Kitchen',
+    eyebrow: 'Science Shorts',
+    description:
+      'Everyday materials become memorable chemistry lessons through reactions, safety notes, and quick revision cards.',
+    kind: 'series',
+    posterUrl:
+      'https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?q=80&w=600&auto=format&fit=crop',
+    backdropUrl:
+      'https://images.unsplash.com/photo-1581093588401-fbb62a02f120?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+    trailerUrl:
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    streamType: 'hls',
+    genres: ['Chemistry', 'Science', 'Revision'],
+    languages: ['English'],
+    rating: 'U/A 7+',
+    releaseYear: 2025,
+    seasonCount: 1,
+    episodeCount: 10,
+    isPremium: true,
+    isTrending: false,
+    maturityNote: 'Supervised lab demonstrations',
+    primaryActionLabel: 'Watch Demo',
+  },
+  {
+    id: 'english-speaking-club',
+    title: 'English Speaking Club',
+    eyebrow: 'Language Track',
+    description:
+      'Daily speaking drills, pronunciation practice, vocabulary games, and confidence-building conversation scenes.',
+    kind: 'series',
+    posterUrl:
+      'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600&auto=format&fit=crop',
+    backdropUrl:
+      'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    trailerUrl:
+      'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+    streamType: 'hls',
+    genres: ['English', 'Communication', 'Language'],
+    languages: ['English', 'Hindi'],
+    rating: 'U',
+    releaseYear: 2026,
+    seasonCount: 2,
+    episodeCount: 18,
+    isPremium: false,
+    isTrending: true,
+    maturityNote: 'Suitable for all learners',
+    primaryActionLabel: 'Practice Now',
+  },
+  {
+    id: 'data-science-foundations',
+    title: 'Data Science Foundations',
+    eyebrow: 'Career Path',
+    description:
+      'Build intuition for data cleaning, visualisation, statistics, notebooks, and real-world project storytelling.',
+    kind: 'series',
+    posterUrl:
+      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop',
+    backdropUrl:
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    trailerUrl:
+      'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    streamType: 'hls',
+    genres: ['Data Science', 'Statistics', 'Python'],
+    languages: ['English'],
+    rating: 'U/A 13+',
+    releaseYear: 2026,
+    seasonCount: 1,
+    episodeCount: 15,
+    isPremium: true,
+    isTrending: true,
+    maturityNote: 'Technical career content',
+    primaryActionLabel: 'Begin Path',
+  },
+  {
+    id: 'neet-biology-rapid',
+    title: 'NEET Biology Rapid',
+    eyebrow: 'Exam Sprint',
+    description:
+      'High-yield biology chapters, diagrams, memory anchors, and timed question practice for medical entrance prep.',
+    kind: 'series',
+    posterUrl:
+      'https://images.unsplash.com/photo-1530026405186-ed1f139313f8?q=80&w=600&auto=format&fit=crop',
+    backdropUrl:
+      'https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+    trailerUrl:
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    streamType: 'hls',
+    genres: ['Biology', 'NEET', 'Exams'],
+    languages: ['English', 'Hindi'],
+    rating: 'U',
+    releaseYear: 2026,
+    seasonCount: 1,
+    episodeCount: 22,
+    isPremium: true,
+    isTrending: true,
+    progressPercent: 0.18,
+    maturityNote: 'Academic preparation',
+    primaryActionLabel: 'Start Sprint',
+  },
+  {
+    id: 'jee-problem-solving',
+    title: 'JEE Problem Solving',
+    eyebrow: 'Rank Booster',
+    description:
+      'Step-by-step problem breakdowns for calculus, mechanics, and physical chemistry with timed solution strategy.',
+    kind: 'series',
+    posterUrl:
+      'https://images.unsplash.com/photo-1596495577886-d920f1fb7238?q=80&w=600&auto=format&fit=crop',
+    backdropUrl:
+      'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    trailerUrl:
+      'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+    streamType: 'hls',
+    genres: ['JEE', 'Math', 'Physics'],
+    languages: ['English', 'Hindi'],
+    rating: 'U/A 7+',
+    releaseYear: 2026,
+    seasonCount: 1,
+    episodeCount: 26,
+    isPremium: true,
+    isTrending: false,
+    progressPercent: 0.42,
+    maturityNote: 'Academic problem solving',
+    primaryActionLabel: 'Solve Now',
+  },
+  {
+    id: 'public-speaking-stage',
+    title: 'Public Speaking Stage',
+    eyebrow: 'Confidence Lab',
+    description:
+      'Learners practice voice, structure, gestures, storytelling, and impromptu speaking through guided stage drills.',
+    kind: 'series',
+    posterUrl:
+      'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=600&auto=format&fit=crop',
+    backdropUrl:
+      'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    trailerUrl:
+      'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    streamType: 'hls',
+    genres: ['Communication', 'Soft Skills', 'Presentation'],
+    languages: ['English'],
+    rating: 'U',
+    releaseYear: 2025,
+    seasonCount: 1,
+    episodeCount: 8,
+    isPremium: false,
+    isTrending: false,
+    maturityNote: 'Suitable for all learners',
+    primaryActionLabel: 'Join Stage',
+  },
+  {
+    id: 'financial-literacy-101',
+    title: 'Financial Literacy 101',
+    eyebrow: 'Life Skills',
+    description:
+      'A practical beginner series on budgeting, saving, credit, investing basics, taxes, and smarter money decisions.',
+    kind: 'series',
+    posterUrl:
+      'https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=600&auto=format&fit=crop',
+    backdropUrl:
+      'https://images.unsplash.com/photo-1554224154-26032ffc0d07?q=80&w=1400&auto=format&fit=crop',
+    videoUrl:
+      'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8',
+    trailerUrl:
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+    streamType: 'hls',
+    genres: ['Finance', 'Life Skills', 'Business'],
+    languages: ['English', 'Hindi'],
+    rating: 'U/A 13+',
+    releaseYear: 2025,
+    seasonCount: 1,
+    episodeCount: 12,
+    isPremium: false,
+    isTrending: true,
+    maturityNote: 'Educational financial concepts',
+    primaryActionLabel: 'Start Basics',
+  },
 ];
 
 export const MEDIA_BY_ID = mediaItems.reduce<Record<string, MediaItem>>((acc, item) => {
@@ -233,6 +451,8 @@ export const HOME_FEED: HomeFeedResponse = {
         MEDIA_BY_ID['future-of-ai'],
         MEDIA_BY_ID['react-native-shiproom'],
         MEDIA_BY_ID['exam-mode'],
+        MEDIA_BY_ID['neet-biology-rapid'],
+        MEDIA_BY_ID['jee-problem-solving'],
       ],
     },
     {
@@ -244,6 +464,8 @@ export const HOME_FEED: HomeFeedResponse = {
         MEDIA_BY_ID['startup-casefiles'],
         MEDIA_BY_ID['design-systems-lab'],
         MEDIA_BY_ID['future-of-ai'],
+        MEDIA_BY_ID['data-science-foundations'],
+        MEDIA_BY_ID['english-speaking-club'],
       ],
     },
     {
@@ -253,6 +475,8 @@ export const HOME_FEED: HomeFeedResponse = {
         MEDIA_BY_ID['design-systems-lab'],
         MEDIA_BY_ID['react-native-shiproom'],
         MEDIA_BY_ID['code-with-creators'],
+        MEDIA_BY_ID['data-science-foundations'],
+        MEDIA_BY_ID['public-speaking-stage'],
       ],
     },
     {
@@ -262,6 +486,20 @@ export const HOME_FEED: HomeFeedResponse = {
         MEDIA_BY_ID['history-in-motion'],
         MEDIA_BY_ID['future-of-ai'],
         MEDIA_BY_ID['startup-casefiles'],
+        MEDIA_BY_ID['physics-studio'],
+        MEDIA_BY_ID['chemistry-kitchen'],
+      ],
+    },
+    {
+      id: 'exam-and-skills',
+      title: 'Exam Prep and Life Skills',
+      subtitle: 'Focused tracks for tests, confidence, and career readiness',
+      items: [
+        MEDIA_BY_ID['neet-biology-rapid'],
+        MEDIA_BY_ID['jee-problem-solving'],
+        MEDIA_BY_ID['financial-literacy-101'],
+        MEDIA_BY_ID['english-speaking-club'],
+        MEDIA_BY_ID['exam-mode'],
       ],
     },
   ],

@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, type Href } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { ListRenderItem } from 'react-native';
 import {
   Dimensions,
@@ -12,6 +13,10 @@ import {
   Text,
   View,
 } from 'react-native';
+import Carousel, {
+  type CarouselRenderItem,
+  type ICarouselInstance,
+} from 'react-native-reanimated-carousel';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ErrorState } from '@/components/feedback/ErrorState';
@@ -26,28 +31,33 @@ import { getTabBarContentPadding } from '@/utils/tabBar';
 type HomeMode = 'learn' | 'practice';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const FOR_YOU_CARD_WIDTH = Math.min(SCREEN_WIDTH - 72, 330);
-const FOR_YOU_CARD_HEIGHT = 244;
-const FOR_YOU_SIDE_PADDING = Math.max((SCREEN_WIDTH - FOR_YOU_CARD_WIDTH) / 2, 20);
-const FOR_YOU_SNAP_INTERVAL = FOR_YOU_CARD_WIDTH + 18;
+const FOR_YOU_CARD_WIDTH = Math.min(SCREEN_WIDTH * 0.76, 330);
+const FOR_YOU_CARD_HEIGHT = 360;
+const FOR_YOU_CAROUSEL_HEIGHT = FOR_YOU_CARD_HEIGHT + 28;
 
 const MODE_OPTIONS: {
   id: HomeMode;
   label: string;
   eyebrow: string;
   icon: keyof typeof Ionicons.glyphMap;
+  activeColors: [string, string, string];
+  idleColors: [string, string, string];
 }[] = [
   {
     id: 'learn',
     label: 'Learn',
     eyebrow: 'Courses & stories',
     icon: 'school',
+    activeColors: ['#1F80E0', '#0EA5E9', '#00E0FF'],
+    idleColors: ['#142345', '#0D1830', '#07101F'],
   },
   {
     id: 'practice',
     label: 'Practice',
     eyebrow: 'Live drills & exams',
     icon: 'flash',
+    activeColors: ['#F5C542', '#F97316', '#DC2626'],
+    idleColors: ['#241A0A', '#151525', '#07101F'],
   },
 ];
 
@@ -103,15 +113,24 @@ export default function HomeScreen() {
           },
           {
             id: 'skill-sprints',
-            title: 'Skill Sprints',
-            subtitle: 'Short tracks for sharper daily progress',
+            title: 'Exam and Skill Sprints',
+            subtitle: 'Focused runs for tests, speed, and applied confidence',
             items: [
+              byId['exam-mode'],
+              byId['math-premier-league'],
               byId['code-with-creators'],
-              byId['react-native-shiproom'],
-              byId['design-systems-lab'],
             ].filter(Boolean) as MediaItem[],
           },
-          ...data.rails.filter((rail) => rail.id === 'trending-now'),
+          {
+            id: 'practice-recommended',
+            title: 'Recommended Practice',
+            subtitle: 'Hands-on sessions picked for your next milestone',
+            items: [
+              byId['startup-casefiles'],
+              byId['react-native-shiproom'],
+              byId['exam-mode'],
+            ].filter(Boolean) as MediaItem[],
+          },
         ],
       };
     }
@@ -125,16 +144,46 @@ export default function HomeScreen() {
         byId['history-in-motion'],
       ].filter(Boolean) as MediaItem[],
       rails: [
-        ...data.rails.filter((rail) =>
-          ['continue-learning', 'frontend-masters', 'documentary-picks'].includes(rail.id),
-        ),
+        {
+          id: 'continue-learning-learn',
+          title: 'Continue Learning',
+          subtitle: 'Resume courses and cinematic lessons',
+          items: [
+            data.hero,
+            byId['react-native-shiproom'],
+            byId['design-systems-lab'],
+          ].filter(Boolean) as MediaItem[],
+        },
+        {
+          id: 'deep-learning-tracks',
+          title: 'Deep Learning Tracks',
+          subtitle: 'Structured series for product, code, and design',
+          items: [
+            byId['design-systems-lab'],
+            byId['react-native-shiproom'],
+            byId['code-with-creators'],
+          ].filter(Boolean) as MediaItem[],
+        },
+        {
+          id: 'documentary-picks-learn',
+          title: 'Documentaries That Teach',
+          subtitle: 'Story-led lessons for broader context',
+          items: [
+            byId['history-in-motion'],
+            data.hero,
+            byId['startup-casefiles'],
+          ].filter(Boolean) as MediaItem[],
+        },
       ],
     };
   }, [activeMode, data]);
 
-  if (isLoading) {
+  if (isLoading || isRefreshing) {
     return (
       <Screen edges={['left', 'right']}>
+        <View className="bg-brand-ink px-5 pt-14">
+          <ModeButtons activeMode={activeMode} onSelectMode={setActiveMode} />
+        </View>
         <HomeSkeleton />
       </Screen>
     );
@@ -154,8 +203,12 @@ export default function HomeScreen() {
 
   return (
     <Screen edges={['left', 'right']}>
+      <View className="bg-brand-ink px-5 pt-14">
+        <ModeButtons activeMode={activeMode} onSelectMode={setActiveMode} />
+      </View>
       <FlatList
         {...HOME_FEED_LIST_PROPS}
+        className="bg-brand-ink"
         data={modeFeed.rails}
         keyExtractor={(rail) => rail.id}
         renderItem={renderRail}
@@ -165,7 +218,6 @@ export default function HomeScreen() {
             carouselItems={modeFeed.carousel}
             hero={modeFeed.hero}
             onSelectMedia={handleSelectMedia}
-            onSelectMode={setActiveMode}
           />
         }
         contentContainerStyle={{ paddingBottom: getTabBarContentPadding(insets.bottom) }}
@@ -187,7 +239,6 @@ type HomeTopExperienceProps = {
   activeMode: HomeMode;
   hero: MediaItem;
   carouselItems: MediaItem[];
-  onSelectMode: (mode: HomeMode) => void;
   onSelectMedia: (item: MediaItem) => void;
 };
 
@@ -195,10 +246,11 @@ function HomeTopExperience({
   activeMode,
   hero,
   carouselItems,
-  onSelectMode,
   onSelectMedia,
 }: HomeTopExperienceProps) {
-  const renderCarouselItem = useCallback<ListRenderItem<MediaItem>>(
+  const carouselRef = useRef<ICarouselInstance>(null);
+
+  const renderCarouselItem = useCallback<CarouselRenderItem<MediaItem>>(
     ({ item, index }) => (
       <Pressable
         accessibilityRole="button"
@@ -206,8 +258,6 @@ function HomeTopExperience({
         className="mr-4"
         style={styles.snapCardWrap}
         onPress={() => onSelectMedia(item)}>
-        <View style={[styles.stackLayer, styles.stackLayerBack]} />
-        <View style={[styles.stackLayer, styles.stackLayerMid]} />
         <View className="overflow-hidden rounded-lg border border-white/10 bg-brand-surface">
           <Image
             source={{ uri: item.backdropUrl }}
@@ -232,48 +282,8 @@ function HomeTopExperience({
   );
 
   return (
-    <View className="pb-2 pt-14">
+    <View className="pb-2">
       <View className="px-5">
-        <View className="mb-5 flex-row gap-3">
-          {MODE_OPTIONS.map((option) => {
-            const isActive = option.id === activeMode;
-
-            return (
-              <Pressable
-                key={option.id}
-                accessibilityRole="button"
-                accessibilityState={{ selected: isActive }}
-                className={`flex-1 rounded-lg border p-3 ${
-                  isActive
-                    ? 'border-brand-cyan bg-brand-blue'
-                    : 'border-white/10 bg-brand-surface'
-                }`}
-                onPress={() => onSelectMode(option.id)}>
-                <View className="flex-row items-center">
-                  <View
-                    className={`h-9 w-9 items-center justify-center rounded-md ${
-                      isActive ? 'bg-white' : 'bg-white/10'
-                    }`}>
-                    <Ionicons
-                      name={option.icon}
-                      color={isActive ? '#1F80E0' : '#FFFFFF'}
-                      size={19}
-                    />
-                  </View>
-                  <View className="ml-3 flex-1">
-                    <Text className="text-base font-black text-white">{option.label}</Text>
-                    <Text
-                      numberOfLines={1}
-                      className={isActive ? 'text-xs font-bold text-white' : 'text-xs text-slate-400'}>
-                      {option.eyebrow}
-                    </Text>
-                  </View>
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
-
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Open ${hero.title}`}
@@ -308,18 +318,100 @@ function HomeTopExperience({
             Swipe through curated {activeMode === 'learn' ? 'learning journeys' : 'practice picks'}
           </Text>
         </View>
-        <FlatList
-          data={carouselItems}
-          horizontal
-          keyExtractor={(item) => item.id}
-          renderItem={renderCarouselItem}
-          snapToInterval={FOR_YOU_SNAP_INTERVAL}
-          snapToAlignment="center"
-          decelerationRate="fast"
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.snapList}
-        />
+        <View style={styles.snapCarouselFrame}>
+          <Carousel
+            ref={carouselRef}
+            data={carouselItems}
+            loop
+            pagingEnabled
+            snapEnabled
+            autoPlay={false}
+            autoPlayInterval={2200}
+            renderItem={renderCarouselItem}
+            mode="horizontal-stack"
+            modeConfig={{
+              snapDirection: 'left',
+              stackInterval: 28,
+              scaleInterval: 0.06,
+              opacityInterval: 0.12,
+            }}
+            customConfig={() => ({ type: 'positive', viewCount: 5 })}
+            onConfigurePanGesture={(gesture) => {
+              gesture.activeOffsetX([-12, 12]).failOffsetY([-8, 8]);
+            }}
+            style={styles.snapCarousel}
+            width={FOR_YOU_CARD_WIDTH}
+            height={FOR_YOU_CAROUSEL_HEIGHT}
+            windowSize={5}
+          />
+        </View>
       </View>
+    </View>
+  );
+}
+
+type ModeButtonsProps = {
+  activeMode: HomeMode;
+  onSelectMode: (mode: HomeMode) => void;
+};
+
+function ModeButtons({ activeMode, onSelectMode }: ModeButtonsProps) {
+  return (
+    <View className="mb-5 flex-row gap-3">
+      {MODE_OPTIONS.map((option) => {
+        const isActive = option.id === activeMode;
+
+        return (
+          <Pressable
+            key={option.id}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isActive }}
+            className="flex-1 overflow-hidden rounded-full"
+            style={isActive ? styles.modeButtonActive : styles.modeButtonIdle}
+            onPress={() => onSelectMode(option.id)}>
+            <LinearGradient
+              colors={isActive ? option.activeColors : option.idleColors}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.modeBorderGradient}>
+              <View
+                className={`flex-row items-center rounded-full ${
+                  isActive ? 'bg-brand-ink/20' : 'bg-brand-ink/80'
+                }`}
+                style={styles.modeButtonInner}>
+                <View
+                  className={`h-8 w-8 items-center justify-center rounded-full ${
+                    isActive ? 'bg-white' : 'bg-white/10'
+                  }`}>
+                  <Ionicons
+                    name={option.icon}
+                    color={
+                      isActive && option.id === 'practice'
+                        ? '#B45309'
+                        : isActive
+                          ? '#1F80E0'
+                          : '#FFFFFF'
+                    }
+                    size={20}
+                  />
+                </View>
+                <View className="ml-3 flex-1">
+                  <Text className="text-sm font-black text-white">{option.label}</Text>
+                  <Text
+                    numberOfLines={1}
+                    className={
+                      isActive
+                        ? 'text-[10px] font-bold text-white'
+                        : 'text-[10px] text-slate-300'
+                    }>
+                    {option.eyebrow}
+                  </Text>
+                </View>
+              </View>
+            </LinearGradient>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -329,33 +421,43 @@ const styles = StyleSheet.create({
     height: 260,
     width: '100%',
   },
+  modeButtonActive: {
+    shadowColor: '#1F80E0',
+    shadowOffset: { height: 6, width: 0 },
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+  },
+  modeButtonIdle: {
+    opacity: 0.92,
+  },
+  modeBorderGradient: {
+    borderRadius: 999,
+    padding: 1.4,
+  },
+  modeButtonInner: {
+    minHeight: 54,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
   snapCardWrap: {
-    height: FOR_YOU_CARD_HEIGHT + 22,
+    height: FOR_YOU_CARD_HEIGHT,
     width: FOR_YOU_CARD_WIDTH,
   },
   snapImage: {
     height: FOR_YOU_CARD_HEIGHT,
     width: FOR_YOU_CARD_WIDTH,
   },
-  snapList: {
-    paddingHorizontal: FOR_YOU_SIDE_PADDING,
+  snapCarousel: {
+    alignItems: 'center',
+    height: FOR_YOU_CAROUSEL_HEIGHT,
+    justifyContent: 'center',
+    overflow: 'visible',
+    width: FOR_YOU_CARD_WIDTH,
   },
-  stackLayer: {
-    borderRadius: 8,
-    position: 'absolute',
-  },
-  stackLayerBack: {
-    backgroundColor: 'rgba(20,35,69,0.72)',
-    height: FOR_YOU_CARD_HEIGHT - 26,
-    left: 24,
-    top: 24,
-    width: FOR_YOU_CARD_WIDTH - 44,
-  },
-  stackLayerMid: {
-    backgroundColor: 'rgba(31,128,224,0.26)',
-    height: FOR_YOU_CARD_HEIGHT - 12,
-    left: 12,
-    top: 12,
-    width: FOR_YOU_CARD_WIDTH - 22,
+  snapCarouselFrame: {
+    alignItems: 'center',
+    height: FOR_YOU_CAROUSEL_HEIGHT,
+    overflow: 'visible',
+    width: SCREEN_WIDTH,
   },
 });

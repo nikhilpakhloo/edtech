@@ -23,6 +23,7 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      initialRouteName="index"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.dark.text,
@@ -42,6 +43,15 @@ export default function TabLayout() {
           fontWeight: '800',
         },
       }}>
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: 'Search',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="search" color={String(color)} size={size + 1} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="index"
         options={{

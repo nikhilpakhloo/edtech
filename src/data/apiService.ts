@@ -20,6 +20,38 @@ export const apiService = {
     return delay(HOME_FEED);
   },
 
+  getAllMedia(): Promise<MediaItem[]> {
+    return delay(Object.values(MEDIA_BY_ID), 320);
+  },
+
+  searchMedia(query: string): Promise<MediaItem[]> {
+    const normalizedQuery = query.trim().toLowerCase();
+    const allMedia = Object.values(MEDIA_BY_ID);
+
+    if (!normalizedQuery) {
+      return delay(allMedia, 220);
+    }
+
+    const matches = allMedia.filter((item) => {
+      const searchableText = [
+        item.title,
+        item.eyebrow,
+        item.description,
+        item.kind,
+        item.rating,
+        item.releaseYear.toString(),
+        ...item.genres,
+        ...item.languages,
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      return searchableText.includes(normalizedQuery);
+    });
+
+    return delay(matches, 260);
+  },
+
   getMediaDetail(id: string): Promise<MediaItem> {
     const item = MEDIA_BY_ID[id];
 

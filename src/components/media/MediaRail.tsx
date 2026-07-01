@@ -1,6 +1,7 @@
+import { router } from 'expo-router';
 import { memo, useCallback } from 'react';
 import type { ListRenderItem } from 'react-native';
-import { FlatList, Text, View } from 'react-native';
+import { FlatList, Pressable, Text, View } from 'react-native';
 
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { MediaCard } from '@/components/media/MediaCard';
@@ -17,6 +18,9 @@ function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
     ({ item }) => <MediaCard item={item} onPress={onSelectMedia} />,
     [onSelectMedia],
   );
+  const handleViewAll = useCallback(() => {
+    router.push('/search');
+  }, []);
 
   if (!rail.items.length) {
     return (
@@ -41,9 +45,15 @@ function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
             <Text className="mt-1 text-sm text-slate-400">{rail.subtitle}</Text>
           ) : null}
         </View>
-        <Text className="text-xs font-black uppercase tracking-[1.5px] text-brand-blue">
-          View all
-        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`View all ${rail.title}`}
+          className="min-h-10 justify-center px-1"
+          onPress={handleViewAll}>
+          <Text className="text-xs font-black uppercase tracking-[1.5px] text-brand-blue">
+            View all
+          </Text>
+        </Pressable>
       </View>
       <FlatList
         {...HOME_RAIL_LIST_PROPS}
