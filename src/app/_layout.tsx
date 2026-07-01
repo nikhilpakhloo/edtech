@@ -3,12 +3,13 @@ import '../../global.css';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AnimatedSplash } from '@/components/feedback/AnimatedSplash';
 import { AppThemeProvider } from '@/theme/AppTheme';
 import { paperDarkTheme, paperLightTheme } from '@/theme/paperTheme';
 import { colors } from '@/theme/tokens';
@@ -16,6 +17,7 @@ import { colors } from '@/theme/tokens';
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [showSplash, setShowSplash] = useState(true);
   const colorScheme = useColorScheme();
   const isDark = colorScheme !== 'light';
   const paperTheme = useMemo(
@@ -26,6 +28,10 @@ export default function RootLayout() {
 
   useEffect(() => {
     void SplashScreen.hideAsync();
+  }, []);
+
+  const handleSplashFinish = useCallback(() => {
+    setShowSplash(false);
   }, []);
 
   return (
@@ -43,6 +49,7 @@ export default function RootLayout() {
               <Stack.Screen name="detail/[mediaId]" />
             </Stack>
             <StatusBar style={isDark ? 'light' : 'dark'} />
+            {showSplash ? <AnimatedSplash onFinish={handleSplashFinish} /> : null}
           </AppThemeProvider>
         </PaperProvider>
       </SafeAreaProvider>

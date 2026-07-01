@@ -1,13 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEvent } from "expo";
 import { Image } from "expo-image";
+import { useIsFocused } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { memo, useCallback, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { memo, useCallback, useEffect, useState } from "react";
+import { AppState, Pressable, StyleSheet, View } from "react-native";
 
 import { useAppTheme } from "@/theme/AppTheme";
 import type { StreamType } from "@/types/media";
-import { selectionHaptic } from "@/utils/haptics";
+import { toggleHaptic } from "@/utils/haptics";
 
 type LearningVideoPlayerProps = {
   title: string;
@@ -29,6 +30,7 @@ function LearningVideoPlayerBase({
   controlsTop = 16,
 }: LearningVideoPlayerProps) {
   const { colors, isDark } = useAppTheme();
+  const isFocused = useIsFocused();
   const [hasFirstFrame, setHasFirstFrame] = useState(false);
   const player = useVideoPlayer(
     {
@@ -55,12 +57,33 @@ function LearningVideoPlayerBase({
     muted: player.muted,
   });
 
+  useEffect(() => {
+    if (isFocused && autoPlay) {
+      player.play();
+      return;
+    }
+
+    player.pause();
+  }, [autoPlay, isFocused, player]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state !== "active") {
+        player.pause();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [player]);
+
   const handleToggleMute = useCallback(() => {
-    selectionHaptic();
+    toggleHaptic(!muted);
     // expo-video exposes mute as a mutable player control.
     // eslint-disable-next-line react-hooks/immutability
     player.muted = !player.muted;
-  }, [player]);
+  }, [muted, player]);
 
   return (
     <View

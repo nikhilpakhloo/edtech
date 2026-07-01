@@ -4,6 +4,7 @@ import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppTheme } from '@/theme/AppTheme';
+import { selectionHaptic } from '@/utils/haptics';
 
 const BASE_TAB_BAR_HEIGHT = 64;
 const IOS_TAB_BAR_HEIGHT = 64;
@@ -25,6 +26,9 @@ export default function TabLayout() {
   return (
     <Tabs
       initialRouteName="index"
+      screenListeners={{
+        tabPress: selectionHaptic,
+      }}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: themeColors.text,

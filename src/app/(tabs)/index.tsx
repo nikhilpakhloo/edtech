@@ -1,9 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router, type Href } from 'expo-router';
-import { useCallback, useMemo, useRef, useState } from 'react';
-import type { ListRenderItem } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import { router, type Href } from "expo-router";
+import { useCallback, useMemo, useRef, useState } from "react";
+import type { ListRenderItem } from "react-native";
 import {
   Dimensions,
   FlatList,
@@ -12,27 +12,27 @@ import {
   StyleSheet,
   Text,
   View,
-} from 'react-native';
+} from "react-native";
 import Carousel, {
   type CarouselRenderItem,
   type ICarouselInstance,
-} from 'react-native-reanimated-carousel';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+} from "react-native-reanimated-carousel";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ErrorState } from '@/components/feedback/ErrorState';
-import { HomeSkeleton } from '@/components/feedback/Skeleton';
-import { MediaRail } from '@/components/media/MediaRail';
-import { Screen } from '@/components/layout/Screen';
-import { useHomeFeed } from '@/features/home/hooks/useHomeFeed';
-import { useAppTheme } from '@/theme/AppTheme';
-import type { MediaItem, MediaRail as MediaRailType } from '@/types/media';
-import { impactHaptic, selectionHaptic } from '@/utils/haptics';
-import { HOME_FEED_LIST_PROPS } from '@/utils/listPerf';
-import { getTabBarContentPadding } from '@/utils/tabBar';
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { HomeSkeleton } from "@/components/feedback/Skeleton";
+import { Screen } from "@/components/layout/Screen";
+import { MediaRail } from "@/components/media/MediaRail";
+import { useHomeFeed } from "@/features/home/hooks/useHomeFeed";
+import { useAppTheme } from "@/theme/AppTheme";
+import type { MediaItem, MediaRail as MediaRailType } from "@/types/media";
+import { impactHaptic, selectionHaptic } from "@/utils/haptics";
+import { HOME_FEED_LIST_PROPS } from "@/utils/listPerf";
+import { getTabBarContentPadding } from "@/utils/tabBar";
 
-type HomeMode = 'learn' | 'practice';
+type HomeMode = "learn" | "practice";
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_WIDTH = Dimensions.get("window").width;
 const FOR_YOU_CARD_WIDTH = Math.min(SCREEN_WIDTH * 0.76, 330);
 const FOR_YOU_CARD_HEIGHT = 360;
 const FOR_YOU_CAROUSEL_HEIGHT = FOR_YOU_CARD_HEIGHT + 28;
@@ -46,32 +46,33 @@ const MODE_OPTIONS: {
   idleColors: [string, string, string];
 }[] = [
   {
-    id: 'learn',
-    label: 'Learn',
-    eyebrow: 'Courses & stories',
-    icon: 'school',
-    activeColors: ['#1F80E0', '#0EA5E9', '#00E0FF'],
-    idleColors: ['#142345', '#0D1830', '#07101F'],
+    id: "learn",
+    label: "Learn",
+    eyebrow: "Courses & stories",
+    icon: "school",
+    activeColors: ["#1F80E0", "#0EA5E9", "#00E0FF"],
+    idleColors: ["#142345", "#0D1830", "#07101F"],
   },
   {
-    id: 'practice',
-    label: 'Practice',
-    eyebrow: 'Live drills & exams',
-    icon: 'flash',
-    activeColors: ['#F5C542', '#F97316', '#DC2626'],
-    idleColors: ['#241A0A', '#151525', '#07101F'],
+    id: "practice",
+    label: "Practice",
+    eyebrow: "Live drills & exams",
+    icon: "flash",
+    activeColors: ["#F5C542", "#F97316", "#DC2626"],
+    idleColors: ["#241A0A", "#151525", "#07101F"],
   },
 ];
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useAppTheme();
-  const [activeMode, setActiveMode] = useState<HomeMode>('learn');
-  const { data, error, isLoading, isRefreshing, refresh, retry } = useHomeFeed();
+  const [activeMode, setActiveMode] = useState<HomeMode>("learn");
+  const { data, error, isLoading, isRefreshing, refresh, retry } =
+    useHomeFeed();
 
   const handleSelectMedia = useCallback((item: MediaItem) => {
     router.push({
-      pathname: '/detail/[mediaId]',
+      pathname: "/detail/[mediaId]",
       params: { mediaId: item.id },
     } as unknown as Href);
   }, []);
@@ -86,52 +87,54 @@ export default function HomeScreen() {
       return null;
     }
 
-    const byId = data.rails.flatMap((rail) => rail.items).reduce<Record<string, MediaItem>>(
-      (acc, item) => {
-        acc[item.id] = item;
-        return acc;
-      },
-      { [data.hero.id]: data.hero },
-    );
+    const byId = data.rails
+      .flatMap((rail) => rail.items)
+      .reduce<Record<string, MediaItem>>(
+        (acc, item) => {
+          acc[item.id] = item;
+          return acc;
+        },
+        { [data.hero.id]: data.hero },
+      );
 
-    if (activeMode === 'practice') {
+    if (activeMode === "practice") {
       return {
-        hero: byId['math-premier-league'] ?? data.hero,
+        hero: byId["math-premier-league"] ?? data.hero,
         carousel: [
-          byId['math-premier-league'],
-          byId['exam-mode'],
-          byId['startup-casefiles'],
-          byId['code-with-creators'],
+          byId["math-premier-league"],
+          byId["exam-mode"],
+          byId["startup-casefiles"],
+          byId["code-with-creators"],
         ].filter(Boolean) as MediaItem[],
         rails: [
           {
-            id: 'live-and-practice',
-            title: 'Live Practice Arenas',
-            subtitle: 'Challenges, revision, and competition-ready sessions',
+            id: "live-and-practice",
+            title: "Live Practice Arenas",
+            subtitle: "Challenges, revision, and competition-ready sessions",
             items: [
-              byId['math-premier-league'],
-              byId['exam-mode'],
-              byId['startup-casefiles'],
+              byId["math-premier-league"],
+              byId["exam-mode"],
+              byId["startup-casefiles"],
             ].filter(Boolean) as MediaItem[],
           },
           {
-            id: 'skill-sprints',
-            title: 'Exam and Skill Sprints',
-            subtitle: 'Focused runs for tests, speed, and applied confidence',
+            id: "skill-sprints",
+            title: "Exam and Skill Sprints",
+            subtitle: "Focused runs for tests, speed, and applied confidence",
             items: [
-              byId['exam-mode'],
-              byId['math-premier-league'],
-              byId['code-with-creators'],
+              byId["exam-mode"],
+              byId["math-premier-league"],
+              byId["code-with-creators"],
             ].filter(Boolean) as MediaItem[],
           },
           {
-            id: 'practice-recommended',
-            title: 'Recommended Practice',
-            subtitle: 'Hands-on sessions picked for your next milestone',
+            id: "practice-recommended",
+            title: "Recommended Practice",
+            subtitle: "Hands-on sessions picked for your next milestone",
             items: [
-              byId['startup-casefiles'],
-              byId['react-native-shiproom'],
-              byId['exam-mode'],
+              byId["startup-casefiles"],
+              byId["react-native-shiproom"],
+              byId["exam-mode"],
             ].filter(Boolean) as MediaItem[],
           },
         ],
@@ -142,39 +145,39 @@ export default function HomeScreen() {
       hero: data.hero,
       carousel: [
         data.hero,
-        byId['design-systems-lab'],
-        byId['react-native-shiproom'],
-        byId['history-in-motion'],
+        byId["design-systems-lab"],
+        byId["react-native-shiproom"],
+        byId["history-in-motion"],
       ].filter(Boolean) as MediaItem[],
       rails: [
         {
-          id: 'continue-learning-learn',
-          title: 'Continue Learning',
-          subtitle: 'Resume courses and cinematic lessons',
+          id: "continue-learning-learn",
+          title: "Continue Learning",
+          subtitle: "Resume courses and cinematic lessons",
           items: [
             data.hero,
-            byId['react-native-shiproom'],
-            byId['design-systems-lab'],
+            byId["react-native-shiproom"],
+            byId["design-systems-lab"],
           ].filter(Boolean) as MediaItem[],
         },
         {
-          id: 'deep-learning-tracks',
-          title: 'Deep Learning Tracks',
-          subtitle: 'Structured series for product, code, and design',
+          id: "deep-learning-tracks",
+          title: "Deep Learning Tracks",
+          subtitle: "Structured series for product, code, and design",
           items: [
-            byId['design-systems-lab'],
-            byId['react-native-shiproom'],
-            byId['code-with-creators'],
+            byId["design-systems-lab"],
+            byId["react-native-shiproom"],
+            byId["code-with-creators"],
           ].filter(Boolean) as MediaItem[],
         },
         {
-          id: 'documentary-picks-learn',
-          title: 'Documentaries That Teach',
-          subtitle: 'Story-led lessons for broader context',
+          id: "documentary-picks-learn",
+          title: "Documentaries That Teach",
+          subtitle: "Story-led lessons for broader context",
           items: [
-            byId['history-in-motion'],
+            byId["history-in-motion"],
             data.hero,
-            byId['startup-casefiles'],
+            byId["startup-casefiles"],
           ].filter(Boolean) as MediaItem[],
         },
       ],
@@ -183,8 +186,11 @@ export default function HomeScreen() {
 
   if (isLoading || isRefreshing) {
     return (
-      <Screen edges={['left', 'right']}>
-        <View className="px-5 pt-14" style={{ backgroundColor: colors.background }}>
+      <Screen edges={["left", "right"]}>
+        <View
+          className="px-5 pt-14"
+          style={{ backgroundColor: colors.background }}
+        >
           <ModeButtons activeMode={activeMode} onSelectMode={setActiveMode} />
         </View>
         <HomeSkeleton />
@@ -194,10 +200,10 @@ export default function HomeScreen() {
 
   if (error || !data || !modeFeed) {
     return (
-      <Screen edges={['top', 'left', 'right']}>
+      <Screen edges={["top", "left", "right"]}>
         <ErrorState
           title="Feed unavailable"
-          message={error ?? 'No content was returned.'}
+          message={error ?? "No content was returned."}
           onRetry={retry}
         />
       </Screen>
@@ -205,8 +211,11 @@ export default function HomeScreen() {
   }
 
   return (
-    <Screen edges={['left', 'right']}>
-      <View className="px-5 pt-14" style={{ backgroundColor: colors.background }}>
+    <Screen edges={["left", "right"]}>
+      <View
+        className="px-5 pt-14"
+        style={{ backgroundColor: colors.background }}
+      >
         <ModeButtons activeMode={activeMode} onSelectMode={setActiveMode} />
       </View>
       <FlatList
@@ -223,14 +232,16 @@ export default function HomeScreen() {
             onSelectMedia={handleSelectMedia}
           />
         }
-        contentContainerStyle={{ paddingBottom: getTabBarContentPadding(insets.bottom) }}
+        contentContainerStyle={{
+          paddingBottom: getTabBarContentPadding(insets.bottom),
+        }}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={refresh}
             tintColor="#FFFFFF"
             progressBackgroundColor="#10141F"
-            colors={['#4F8CFF']}
+            colors={["#4F8CFF"]}
           />
         }
       />
@@ -264,13 +275,15 @@ function HomeTopExperience({
         onPress={() => {
           impactHaptic();
           onSelectMedia(item);
-        }}>
+        }}
+      >
         <View
           className="overflow-hidden rounded-lg border"
           style={{
             backgroundColor: colors.surface,
-            borderColor: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
-          }}>
+            borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
+          }}
+        >
           <Image
             source={{ uri: item.backdropUrl }}
             cachePolicy="disk"
@@ -283,7 +296,10 @@ function HomeTopExperience({
             <Text className="text-[11px] font-black uppercase tracking-[1.5px] text-brand-cyan">
               #{index + 1} for you
             </Text>
-            <Text numberOfLines={1} className="mt-1 text-lg font-black text-white">
+            <Text
+              numberOfLines={1}
+              className="mt-1 text-lg font-black text-white"
+            >
               {item.title}
             </Text>
           </View>
@@ -302,12 +318,13 @@ function HomeTopExperience({
           className="overflow-hidden rounded-lg border"
           style={{
             backgroundColor: colors.surface,
-            borderColor: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
+            borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
           }}
           onPress={() => {
             impactHaptic();
             onSelectMedia(hero);
-          }}>
+          }}
+        >
           <Image
             source={{ uri: hero.backdropUrl }}
             cachePolicy="disk"
@@ -318,12 +335,20 @@ function HomeTopExperience({
           <View className="absolute inset-0 bg-black/25" />
           <View className="absolute bottom-0 left-0 right-0 bg-brand-ink/85 px-4 py-4">
             <Text className="text-[11px] font-black uppercase tracking-[1.8px] text-brand-gold">
-              {activeMode === 'learn' ? 'Featured lesson' : 'Featured challenge'}
+              {activeMode === "learn"
+                ? "Featured lesson"
+                : "Featured challenge"}
             </Text>
-            <Text numberOfLines={2} className="mt-1 text-2xl font-black text-white">
+            <Text
+              numberOfLines={2}
+              className="mt-1 text-2xl font-black text-white"
+            >
               {hero.title}
             </Text>
-            <Text numberOfLines={2} className="mt-2 text-sm leading-5 text-slate-300">
+            <Text
+              numberOfLines={2}
+              className="mt-2 text-sm leading-5 text-slate-300"
+            >
               {hero.description}
             </Text>
           </View>
@@ -336,7 +361,8 @@ function HomeTopExperience({
             For You
           </Text>
           <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
-            Swipe through curated {activeMode === 'learn' ? 'learning journeys' : 'practice picks'}
+            Swipe through curated{" "}
+            {activeMode === "learn" ? "learning journeys" : "practice picks"}
           </Text>
         </View>
         <View style={styles.snapCarouselFrame}>
@@ -351,12 +377,12 @@ function HomeTopExperience({
             renderItem={renderCarouselItem}
             mode="horizontal-stack"
             modeConfig={{
-              snapDirection: 'left',
+              snapDirection: "left",
               stackInterval: 28,
               scaleInterval: 0.06,
               opacityInterval: 0.12,
             }}
-            customConfig={() => ({ type: 'positive', viewCount: 5 })}
+            customConfig={() => ({ type: "positive", viewCount: 5 })}
             onConfigurePanGesture={(gesture) => {
               gesture.activeOffsetX([-12, 12]).failOffsetY([-8, 8]);
             }}
@@ -392,42 +418,49 @@ function ModeButtons({ activeMode, onSelectMode }: ModeButtonsProps) {
             onPress={() => {
               selectionHaptic();
               onSelectMode(option.id);
-            }}>
+            }}
+          >
             <LinearGradient
               colors={isActive ? option.activeColors : option.idleColors}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={styles.modeBorderGradient}>
+              style={styles.modeBorderGradient}
+            >
               <View
                 className={`flex-row items-center rounded-full ${
-                  isActive ? 'bg-brand-ink/20' : 'bg-brand-ink/80'
+                  isActive ? "bg-brand-ink/20" : "bg-brand-ink/80"
                 }`}
-                style={styles.modeButtonInner}>
+                style={styles.modeButtonInner}
+              >
                 <View
                   className={`h-8 w-8 items-center justify-center rounded-full ${
-                    isActive ? 'bg-white' : 'bg-white/10'
-                  }`}>
+                    isActive ? "bg-white" : "bg-white/10"
+                  }`}
+                >
                   <Ionicons
                     name={option.icon}
                     color={
-                      isActive && option.id === 'practice'
-                        ? '#B45309'
+                      isActive && option.id === "practice"
+                        ? "#B45309"
                         : isActive
-                          ? '#1F80E0'
-                          : '#FFFFFF'
+                          ? "#1F80E0"
+                          : "#FFFFFF"
                     }
                     size={20}
                   />
                 </View>
                 <View className="ml-3 flex-1">
-                  <Text className="text-sm font-black text-white">{option.label}</Text>
+                  <Text className="text-sm font-black text-white">
+                    {option.label}
+                  </Text>
                   <Text
                     numberOfLines={1}
                     className={
                       isActive
-                        ? 'text-[10px] font-bold text-white'
-                        : 'text-[10px] text-slate-300'
-                    }>
+                        ? "text-[10px] font-bold text-white"
+                        : "text-[10px] text-slate-300"
+                    }
+                  >
                     {option.eyebrow}
                   </Text>
                 </View>
@@ -443,10 +476,10 @@ function ModeButtons({ activeMode, onSelectMode }: ModeButtonsProps) {
 const styles = StyleSheet.create({
   bannerImage: {
     height: 260,
-    width: '100%',
+    width: "100%",
   },
   modeButtonActive: {
-    shadowColor: '#1F80E0',
+    shadowColor: "#1F80E0",
     shadowOffset: { height: 6, width: 0 },
     shadowOpacity: 0.22,
     shadowRadius: 10,
@@ -472,16 +505,16 @@ const styles = StyleSheet.create({
     width: FOR_YOU_CARD_WIDTH,
   },
   snapCarousel: {
-    alignItems: 'center',
+    alignItems: "center",
     height: FOR_YOU_CAROUSEL_HEIGHT,
-    justifyContent: 'center',
-    overflow: 'visible',
+    justifyContent: "center",
+    overflow: "visible",
     width: FOR_YOU_CARD_WIDTH,
   },
   snapCarouselFrame: {
-    alignItems: 'center',
+    alignItems: "center",
     height: FOR_YOU_CAROUSEL_HEIGHT,
-    overflow: 'visible',
+    overflow: "visible",
     width: SCREEN_WIDTH,
   },
 });

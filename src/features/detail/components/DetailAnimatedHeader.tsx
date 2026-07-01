@@ -103,16 +103,34 @@ export function DetailAnimatedHeader({
           {
             backgroundColor: isDark ? "rgba(3,7,18,0.94)" : "rgba(255,255,255,0.94)",
             borderBottomColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(15,23,42,0.12)",
+            elevation: 10,
+            shadowColor: "#000000",
+            shadowOffset: { height: 8, width: 0 },
+            shadowOpacity: isDark ? 0.28 : 0.12,
+            shadowRadius: 16,
           },
         ]}
       >
-        <Text
-          numberOfLines={1}
-          className="text-xl font-black"
-          style={{ color: colors.text, paddingTop: insets.top + 18 }}
+        <View
+          className="flex-row items-center"
+          style={{ paddingTop: insets.top + 10 }}
         >
-          {title}
-        </Text>
+          <View className="h-9 w-9 items-center justify-center rounded-md bg-brand-blue">
+            <Text className="text-base font-black text-white">E</Text>
+          </View>
+          <View className="ml-3 flex-1">
+            <Text className="text-[10px] font-black uppercase tracking-[1.5px] text-brand-cyan">
+              Now watching
+            </Text>
+            <Text
+              numberOfLines={1}
+              className="mt-0.5 text-lg font-black"
+              style={{ color: colors.text }}
+            >
+              {title}
+            </Text>
+          </View>
+        </View>
       </Animated.View>
     </Animated.View>
   );
