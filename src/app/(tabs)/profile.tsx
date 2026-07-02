@@ -1,23 +1,42 @@
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Avatar, Switch } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { Avatar, Switch } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Screen } from '@/components/layout/Screen';
-import { APP_STRINGS } from '@/constants/string';
-import { apiService } from '@/data/apiService';
-import { useAppTheme } from '@/theme/AppTheme';
-import type { ProfileResponse } from '@/types/media';
-import { selectionHaptic } from '@/utils/haptics';
-import { useResponsiveMetrics } from '@/utils/responsive';
-import { getTabBarContentPadding } from '@/utils/tabBar';
+import { Screen } from "@/components/layout/Screen";
+import { APP_STRINGS } from "@/constants/string";
+import { apiService } from "@/data/apiService";
+import { useAppTheme } from "@/theme/AppTheme";
+import type { ProfileResponse } from "@/types/media";
+import { selectionHaptic } from "@/utils/haptics";
+import { useResponsiveMetrics } from "@/utils/responsive";
+import { getTabBarContentPadding } from "@/utils/tabBar";
 
 const learnerStats = [
-  { label: APP_STRINGS.profile.stats.streak.label, value: '8', suffix: APP_STRINGS.profile.stats.streak.suffix },
-  { label: APP_STRINGS.profile.stats.saved.label, value: '4', suffix: APP_STRINGS.profile.stats.saved.suffix },
-  { label: APP_STRINGS.profile.stats.progress.label, value: '68', suffix: APP_STRINGS.profile.stats.progress.suffix },
+  {
+    label: APP_STRINGS.profile.stats.streak.label,
+    value: "8",
+    suffix: APP_STRINGS.profile.stats.streak.suffix,
+  },
+  {
+    label: APP_STRINGS.profile.stats.saved.label,
+    value: "4",
+    suffix: APP_STRINGS.profile.stats.saved.suffix,
+  },
+  {
+    label: APP_STRINGS.profile.stats.progress.label,
+    value: "68",
+    suffix: APP_STRINGS.profile.stats.progress.suffix,
+  },
 ];
 
 const quickActions: {
@@ -28,33 +47,33 @@ const quickActions: {
   colors: [string, string];
 }[] = [
   {
-    id: 'downloads',
+    id: "downloads",
     label: APP_STRINGS.profile.quickActions.downloads.label,
     caption: APP_STRINGS.profile.quickActions.downloads.caption,
-    icon: 'download-outline',
-    colors: ['#1F80E0', '#00C2FF'],
+    icon: "download-outline",
+    colors: ["#1F80E0", "#00C2FF"],
   },
   {
-    id: 'watchlist',
+    id: "watchlist",
     label: APP_STRINGS.profile.quickActions.watchlist.label,
     caption: APP_STRINGS.profile.quickActions.watchlist.caption,
-    icon: 'bookmark-outline',
-    colors: ['#F5C542', '#F97316'],
+    icon: "bookmark-outline",
+    colors: ["#F5C542", "#F97316"],
   },
   {
-    id: 'certificates',
+    id: "certificates",
     label: APP_STRINGS.profile.quickActions.certificates.label,
     caption: APP_STRINGS.profile.quickActions.certificates.caption,
-    icon: 'ribbon-outline',
-    colors: ['#22C55E', '#14B8A6'],
+    icon: "ribbon-outline",
+    colors: ["#22C55E", "#14B8A6"],
   },
 ];
 
 const settingIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
-  autoplay: 'play-circle-outline',
-  quality: 'wifi-outline',
-  downloads: 'cloud-download-outline',
-  language: 'language-outline',
+  autoplay: "play-circle-outline",
+  quality: "wifi-outline",
+  downloads: "cloud-download-outline",
+  language: "language-outline",
 };
 
 export default function ProfileScreen() {
@@ -81,7 +100,7 @@ export default function ProfileScreen() {
 
   if (!profile) {
     return (
-      <Screen edges={['top', 'left', 'right']}>
+      <Screen edges={["top", "left", "right"]}>
         <View className="flex-1 items-center justify-center px-5">
           <ActivityIndicator color="#4F8CFF" size="large" />
         </View>
@@ -90,7 +109,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <Screen edges={['top', 'left', 'right']}>
+    <Screen edges={["top", "left", "right"]}>
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
@@ -99,7 +118,8 @@ export default function ProfileScreen() {
           paddingBottom: getTabBarContentPadding(insets.bottom),
           paddingHorizontal: metrics.horizontalPadding,
           paddingTop: 18,
-        }}>
+        }}
+      >
         <View style={{ marginBottom: metrics.isCompact ? 18 : 20 }}>
           <Text className="text-[13px] font-black uppercase tracking-[2px] text-brand-cyan">
             {APP_STRINGS.profile.eyebrow}
@@ -110,19 +130,24 @@ export default function ProfileScreen() {
               color: colors.text,
               fontSize: metrics.isCompact ? 28 : 30,
               lineHeight: metrics.isCompact ? 34 : 36,
-            }}>
+            }}
+          >
             {APP_STRINGS.profile.title}
           </Text>
-          <Text className="mt-2 text-sm leading-5" style={{ color: colors.textMuted }}>
+          <Text
+            className="mt-2 text-sm leading-5"
+            style={{ color: colors.textMuted }}
+          >
             {APP_STRINGS.profile.subtitle}
           </Text>
         </View>
 
         <LinearGradient
-          colors={['#15284F', '#0B1222', '#111827']}
+          colors={["#15284F", "#0B1222", "#111827"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.heroCard}>
+          style={styles.heroCard}
+        >
           <View className="absolute right-[-30px] top-[-34px] h-36 w-36 rounded-full bg-brand-blue/30" />
           <View className="absolute bottom-[-48px] left-[-42px] h-40 w-40 rounded-full bg-brand-cyan/10" />
           <View className="flex-row items-center">
@@ -130,20 +155,25 @@ export default function ProfileScreen() {
               size={62}
               label={profile.avatarInitials}
               color="#05070D"
-              labelStyle={{ fontWeight: '900' }}
+              labelStyle={{ fontWeight: "900" }}
               style={styles.avatar}
             />
             <View className="ml-4 flex-1">
-              <Text className="text-2xl font-black text-white">{profile.displayName}</Text>
+              <Text className="text-2xl font-black text-white">
+                {profile.displayName}
+              </Text>
               <View className="mt-2 self-start rounded-full bg-white/10 px-3 py-1">
-                <Text className="text-xs font-black text-brand-gold">{profile.planName}</Text>
+                <Text className="text-xs font-black text-brand-gold">
+                  {profile.planName}
+                </Text>
               </View>
             </View>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={APP_STRINGS.accessibility.editProfile}
               className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
-              onPress={selectionHaptic}>
+              onPress={selectionHaptic}
+            >
               <Ionicons name="create-outline" color="#FFFFFF" size={20} />
             </Pressable>
           </View>
@@ -152,13 +182,18 @@ export default function ProfileScreen() {
             {learnerStats.map((stat, index) => (
               <View
                 key={stat.label}
-                className={`flex-1 px-3 py-3 ${index > 0 ? 'border-l border-white/10' : ''}`}>
+                className={`flex-1 px-3 py-3 ${index > 0 ? "border-l border-white/10" : ""}`}
+              >
                 <Text className="text-[11px] font-bold uppercase tracking-[1px] text-slate-400">
                   {stat.label}
                 </Text>
                 <View className="mt-1 flex-row items-end">
-                  <Text className="text-2xl font-black text-white">{stat.value}</Text>
-                  <Text className="mb-1 ml-1 text-xs font-bold text-brand-cyan">{stat.suffix}</Text>
+                  <Text className="text-2xl font-black text-white">
+                    {stat.value}
+                  </Text>
+                  <Text className="mb-1 ml-1 text-xs font-bold text-brand-cyan">
+                    {stat.suffix}
+                  </Text>
                 </View>
               </View>
             ))}
@@ -167,29 +202,43 @@ export default function ProfileScreen() {
 
         <View
           style={{
-            flexDirection: 'row',
-            flexWrap: metrics.isCompact ? 'wrap' : 'nowrap',
+            flexDirection: "row",
+            flexWrap: metrics.isCompact ? "wrap" : "nowrap",
             gap: 12,
             marginTop: metrics.sectionGap,
-          }}>
+          }}
+        >
           {quickActions.map((action) => (
             <Pressable
               key={action.id}
               accessibilityRole="button"
               accessibilityLabel={action.label}
               className="overflow-hidden rounded-lg"
-              style={metrics.isCompact ? { width: quickActionWidth } : { flex: 1 }}
-              onPress={selectionHaptic}>
+              style={
+                metrics.isCompact ? { width: quickActionWidth } : { flex: 1 }
+              }
+              onPress={selectionHaptic}
+            >
               <LinearGradient
                 colors={action.colors}
-                style={[styles.quickAction, { minHeight: metrics.quickActionMinHeight }]}>
+                style={[
+                  styles.quickAction,
+                  { minHeight: metrics.quickActionMinHeight },
+                ]}
+              >
                 <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
                   <Ionicons name={action.icon} color="#FFFFFF" size={22} />
                 </View>
-                <Text numberOfLines={1} className="mt-3 text-sm font-black text-white">
+                <Text
+                  numberOfLines={1}
+                  className="mt-3 text-sm font-black text-white"
+                >
                   {action.label}
                 </Text>
-                <Text numberOfLines={1} className="mt-1 text-[11px] font-semibold text-white/80">
+                <Text
+                  numberOfLines={1}
+                  className="mt-1 text-[11px] font-semibold text-white/80"
+                >
                   {action.caption}
                 </Text>
               </LinearGradient>
@@ -210,8 +259,9 @@ export default function ProfileScreen() {
           className="mt-4 overflow-hidden rounded-lg border"
           style={{
             backgroundColor: colors.surface,
-            borderColor: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
-          }}>
+            borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
+          }}
+        >
           {profile.settings.map((setting, index) => (
             <View
               key={setting.id}
@@ -219,36 +269,44 @@ export default function ProfileScreen() {
               style={{
                 borderBottomColor:
                   index === profile.settings.length - 1
-                    ? 'transparent'
+                    ? "transparent"
                     : isDark
-                      ? 'rgba(255,255,255,0.1)'
+                      ? "rgba(255,255,255,0.1)"
                       : colors.border,
-              }}>
+              }}
+            >
               <View className="h-11 w-11 items-center justify-center rounded-full bg-brand-blue/15">
                 <Ionicons
-                  name={settingIcons[setting.id] ?? 'settings-outline'}
+                  name={settingIcons[setting.id] ?? "settings-outline"}
                   color="#4F8CFF"
                   size={22}
                 />
               </View>
               <View className="ml-3 flex-1">
                 <View className="flex-row items-center">
-                  <Text className="flex-1 text-base font-bold" style={{ color: colors.text }}>
+                  <Text
+                    className="flex-1 text-base font-bold"
+                    style={{ color: colors.text }}
+                  >
                     {setting.title}
                   </Text>
-                  {typeof setting.enabled !== 'boolean' ? (
+                  {typeof setting.enabled !== "boolean" ? (
                     <Text
                       numberOfLines={1}
-                      className="ml-2 text-sm font-black text-brand-cyan">
+                      className="ml-2 text-sm font-black text-brand-cyan"
+                    >
                       {setting.value}
                     </Text>
                   ) : null}
                 </View>
-                <Text className="mt-1 text-sm leading-5" style={{ color: colors.textMuted }}>
+                <Text
+                  className="mt-1 text-sm leading-5"
+                  style={{ color: colors.textMuted }}
+                >
                   {setting.description}
                 </Text>
               </View>
-              {typeof setting.enabled === 'boolean' ? (
+              {typeof setting.enabled === "boolean" ? (
                 <Switch color="#1F80E0" value={setting.enabled} />
               ) : null}
             </View>
@@ -259,17 +317,24 @@ export default function ProfileScreen() {
           className="mt-6 rounded-lg border p-4"
           style={{
             backgroundColor: colors.elevated,
-            borderColor: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
-          }}>
+            borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
+          }}
+        >
           <View className="flex-row items-center">
             <View className="h-11 w-11 items-center justify-center rounded-full bg-brand-gold/15">
               <Ionicons name="flame-outline" color="#F5C542" size={23} />
             </View>
             <View className="ml-3 flex-1">
-              <Text className="text-base font-black" style={{ color: colors.text }}>
+              <Text
+                className="text-base font-black"
+                style={{ color: colors.text }}
+              >
                 {APP_STRINGS.profile.streakTitle}
               </Text>
-              <Text className="mt-1 text-sm leading-5" style={{ color: colors.textMuted }}>
+              <Text
+                className="mt-1 text-sm leading-5"
+                style={{ color: colors.textMuted }}
+              >
                 {APP_STRINGS.profile.streakMessage}
               </Text>
             </View>
@@ -282,15 +347,15 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   avatar: {
-    backgroundColor: '#F5C542',
-    borderColor: 'rgba(255,255,255,0.28)',
+    backgroundColor: "#F5C542",
+    borderColor: "rgba(255,255,255,0.28)",
     borderWidth: 2,
   },
   heroCard: {
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: "rgba(255,255,255,0.12)",
     borderRadius: 8,
     borderWidth: 1,
-    overflow: 'hidden',
+    overflow: "hidden",
     padding: 16,
   },
   quickAction: {
