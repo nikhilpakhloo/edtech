@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "EdStream",
-    "slug": "EdStream",
+    "slug": "edstream",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/splash-icon.png",
@@ -61,6 +61,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a4078053-6b31-40a2-a06a-82a6a5062050"
+      }
+    },
+    "owner": "nikhilpakhloo"
   }
 }

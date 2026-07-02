@@ -4,15 +4,9 @@
     "strict": true,
     "jsxImportSource": "nativewind",
     "resolveJsonModule": true,
-    "types": [
-      "jest"
-    ],
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@tests/*": [
-        "./__tests__/*"
       ],
       "@/assets/*": [
         "./assets/*"
