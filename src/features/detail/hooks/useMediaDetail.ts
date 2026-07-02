@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { APP_STRINGS } from '@/constants/string';
 import { apiService } from '@/data/apiService';
 import type { MediaItem } from '@/types/media';
 
@@ -23,7 +24,7 @@ export function useMediaDetail(mediaId?: string) {
       setState({
         item: null,
         related: [],
-        error: 'Missing media id.',
+        error: APP_STRINGS.errors.missingMediaId,
         isLoading: false,
       });
       return;
@@ -41,7 +42,7 @@ export function useMediaDetail(mediaId?: string) {
       setState({
         item: null,
         related: [],
-        error: error instanceof Error ? error.message : 'Unable to load title.',
+        error: error instanceof Error ? error.message : APP_STRINGS.errors.unableToLoadTitle,
         isLoading: false,
       });
     }
@@ -56,7 +57,7 @@ export function useMediaDetail(mediaId?: string) {
           setState({
             item: null,
             related: [],
-            error: 'Missing media id.',
+            error: APP_STRINGS.errors.missingMediaId,
             isLoading: false,
           });
         }
@@ -74,7 +75,7 @@ export function useMediaDetail(mediaId?: string) {
             setState({
               item: null,
               related: [],
-              error: error instanceof Error ? error.message : 'Unable to load title.',
+              error: error instanceof Error ? error.message : APP_STRINGS.errors.unableToLoadTitle,
               isLoading: false,
             });
           }

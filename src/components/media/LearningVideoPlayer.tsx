@@ -6,6 +6,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import { memo, useCallback, useEffect, useState } from "react";
 import { AppState, Pressable, StyleSheet, View } from "react-native";
 
+import { APP_STRINGS } from "@/constants/string";
 import { useAppTheme } from "@/theme/AppTheme";
 import type { StreamType } from "@/types/media";
 import { toggleHaptic } from "@/utils/haptics";
@@ -38,7 +39,7 @@ function LearningVideoPlayerBase({
       contentType: streamType === "hls" ? "hls" : "auto",
       metadata: {
         title,
-        artist: "EdStream",
+        artist: APP_STRINGS.brand.artist,
         artwork: posterUrl,
       },
       useCaching: streamType === "mp4",
@@ -117,7 +118,9 @@ function LearningVideoPlayerBase({
       ) : null}
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={muted ? "Unmute video" : "Mute video"}
+        accessibilityLabel={
+          muted ? APP_STRINGS.accessibility.unmuteVideo : APP_STRINGS.accessibility.muteVideo
+        }
         className="absolute right-4 h-11 w-11 items-center justify-center rounded-full bg-black/65"
         style={{ top: controlsTop }}
         onPress={handleToggleMute}

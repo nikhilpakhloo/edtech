@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
 
+import { APP_STRINGS } from '@/constants/string';
 import { useAppTheme } from '@/theme/AppTheme';
 import { selectionHaptic } from '@/utils/haptics';
 
@@ -15,7 +16,7 @@ type ErrorStateProps = {
 function ErrorStateBase({
   title,
   message,
-  actionLabel = 'Try Again',
+  actionLabel = APP_STRINGS.common.tryAgain,
   onRetry,
 }: ErrorStateProps) {
   const { colors } = useAppTheme();

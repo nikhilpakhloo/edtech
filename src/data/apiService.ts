@@ -1,3 +1,4 @@
+import { APP_STRINGS } from '@/constants/string';
 import { HOME_FEED, MEDIA_BY_ID, PROFILE } from '@/data/mockMedia';
 import type { HomeFeedResponse, MediaItem, ProfileResponse } from '@/types/media';
 
@@ -56,7 +57,7 @@ export const apiService = {
     const item = MEDIA_BY_ID[id];
 
     if (!item) {
-      return rejectAfterDelay('This title is no longer available.');
+      return rejectAfterDelay(APP_STRINGS.errors.titleNoLongerAvailable);
     }
 
     return delay(item, 450);

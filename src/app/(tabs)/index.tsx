@@ -23,6 +23,7 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { HomeSkeleton } from "@/components/feedback/Skeleton";
 import { Screen } from "@/components/layout/Screen";
 import { MediaRail } from "@/components/media/MediaRail";
+import { APP_STRINGS } from "@/constants/string";
 import { useHomeFeed } from "@/features/home/hooks/useHomeFeed";
 import { useAppTheme } from "@/theme/AppTheme";
 import type { MediaItem, MediaRail as MediaRailType } from "@/types/media";
@@ -47,16 +48,16 @@ const MODE_OPTIONS: {
 }[] = [
   {
     id: "learn",
-    label: "Learn",
-    eyebrow: "Courses & stories",
+    label: APP_STRINGS.home.modes.learn.label,
+    eyebrow: APP_STRINGS.home.modes.learn.eyebrow,
     icon: "school",
     activeColors: ["#1F80E0", "#0EA5E9", "#00E0FF"],
     idleColors: ["#142345", "#0D1830", "#07101F"],
   },
   {
     id: "practice",
-    label: "Practice",
-    eyebrow: "Live drills & exams",
+    label: APP_STRINGS.home.modes.practice.label,
+    eyebrow: APP_STRINGS.home.modes.practice.eyebrow,
     icon: "flash",
     activeColors: ["#F5C542", "#F97316", "#DC2626"],
     idleColors: ["#241A0A", "#151525", "#07101F"],
@@ -109,8 +110,8 @@ export default function HomeScreen() {
         rails: [
           {
             id: "live-and-practice",
-            title: "Live Practice Arenas",
-            subtitle: "Challenges, revision, and competition-ready sessions",
+            title: APP_STRINGS.home.rails.livePracticeArenas.title,
+            subtitle: APP_STRINGS.home.rails.livePracticeArenas.subtitle,
             items: [
               byId["math-premier-league"],
               byId["exam-mode"],
@@ -119,8 +120,8 @@ export default function HomeScreen() {
           },
           {
             id: "skill-sprints",
-            title: "Exam and Skill Sprints",
-            subtitle: "Focused runs for tests, speed, and applied confidence",
+            title: APP_STRINGS.home.rails.skillSprints.title,
+            subtitle: APP_STRINGS.home.rails.skillSprints.subtitle,
             items: [
               byId["exam-mode"],
               byId["math-premier-league"],
@@ -129,8 +130,8 @@ export default function HomeScreen() {
           },
           {
             id: "practice-recommended",
-            title: "Recommended Practice",
-            subtitle: "Hands-on sessions picked for your next milestone",
+            title: APP_STRINGS.home.rails.practiceRecommended.title,
+            subtitle: APP_STRINGS.home.rails.practiceRecommended.subtitle,
             items: [
               byId["startup-casefiles"],
               byId["react-native-shiproom"],
@@ -152,8 +153,8 @@ export default function HomeScreen() {
       rails: [
         {
           id: "continue-learning-learn",
-          title: "Continue Learning",
-          subtitle: "Resume courses and cinematic lessons",
+          title: APP_STRINGS.home.rails.continueLearning.title,
+          subtitle: APP_STRINGS.home.rails.continueLearning.subtitle,
           items: [
             data.hero,
             byId["react-native-shiproom"],
@@ -162,8 +163,8 @@ export default function HomeScreen() {
         },
         {
           id: "deep-learning-tracks",
-          title: "Deep Learning Tracks",
-          subtitle: "Structured series for product, code, and design",
+          title: APP_STRINGS.home.rails.deepLearningTracks.title,
+          subtitle: APP_STRINGS.home.rails.deepLearningTracks.subtitle,
           items: [
             byId["design-systems-lab"],
             byId["react-native-shiproom"],
@@ -172,8 +173,8 @@ export default function HomeScreen() {
         },
         {
           id: "documentary-picks-learn",
-          title: "Documentaries That Teach",
-          subtitle: "Story-led lessons for broader context",
+          title: APP_STRINGS.home.rails.documentaryPicks.title,
+          subtitle: APP_STRINGS.home.rails.documentaryPicks.subtitle,
           items: [
             byId["history-in-motion"],
             data.hero,
@@ -202,8 +203,8 @@ export default function HomeScreen() {
     return (
       <Screen edges={["top", "left", "right"]}>
         <ErrorState
-          title="Feed unavailable"
-          message={error ?? "No content was returned."}
+          title={APP_STRINGS.errors.feedUnavailable}
+          message={error ?? APP_STRINGS.errors.noContentReturned}
           onRetry={retry}
         />
       </Screen>
@@ -269,7 +270,7 @@ function HomeTopExperience({
     ({ item, index }) => (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Open ${item.title}`}
+        accessibilityLabel={APP_STRINGS.accessibility.openTitle(item.title)}
         className="mr-4"
         style={styles.snapCardWrap}
         onPress={() => {
@@ -294,7 +295,7 @@ function HomeTopExperience({
           <View className="absolute inset-0 bg-black/25" />
           <View className="absolute bottom-0 left-0 right-0 bg-brand-ink/80 px-4 py-3">
             <Text className="text-[11px] font-black uppercase tracking-[1.5px] text-brand-cyan">
-              #{index + 1} for you
+              {APP_STRINGS.home.forYouRank(index + 1)}
             </Text>
             <Text
               numberOfLines={1}
@@ -314,7 +315,7 @@ function HomeTopExperience({
       <View className="px-5">
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Open ${hero.title}`}
+          accessibilityLabel={APP_STRINGS.accessibility.openTitle(hero.title)}
           className="overflow-hidden rounded-lg border"
           style={{
             backgroundColor: colors.surface,
@@ -336,8 +337,8 @@ function HomeTopExperience({
           <View className="absolute bottom-0 left-0 right-0 bg-brand-ink/85 px-4 py-4">
             <Text className="text-[11px] font-black uppercase tracking-[1.8px] text-brand-gold">
               {activeMode === "learn"
-                ? "Featured lesson"
-                : "Featured challenge"}
+                ? APP_STRINGS.home.modes.learn.featured
+                : APP_STRINGS.home.modes.practice.featured}
             </Text>
             <Text
               numberOfLines={2}
@@ -358,11 +359,14 @@ function HomeTopExperience({
       <View className="mt-6">
         <View className="mb-3 px-5">
           <Text className="text-xl font-black" style={{ color: colors.text }}>
-            For You
+            {APP_STRINGS.home.forYou}
           </Text>
           <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
-            Swipe through curated{" "}
-            {activeMode === "learn" ? "learning journeys" : "practice picks"}
+            {APP_STRINGS.home.swipeThroughCurated(
+              activeMode === "learn"
+                ? APP_STRINGS.home.modes.learn.swipeSuffix
+                : APP_STRINGS.home.modes.practice.swipeSuffix,
+            )}
           </Text>
         </View>
         <View style={styles.snapCarouselFrame}>

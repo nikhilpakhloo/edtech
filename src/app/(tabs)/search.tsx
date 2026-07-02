@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { SearchSkeleton } from '@/components/feedback/Skeleton';
 import { MediaCard } from '@/components/media/MediaCard';
+import { APP_STRINGS } from '@/constants/string';
 import { apiService } from '@/data/apiService';
 import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem } from '@/types/media';
@@ -36,7 +37,7 @@ export default function SearchScreen() {
       })
       .catch((loadError) => {
         if (isMounted) {
-          setError(loadError instanceof Error ? loadError.message : 'Unable to load search.');
+          setError(loadError instanceof Error ? loadError.message : APP_STRINGS.errors.unableToLoadSearch);
         }
       })
       .finally(() => {
@@ -79,30 +80,30 @@ export default function SearchScreen() {
     () => [
       {
         id: 'trending',
-        title: 'Trending Searches',
-        subtitle: 'Popular across EdStream right now',
+        title: APP_STRINGS.search.rails.trending.title,
+        subtitle: APP_STRINGS.search.rails.trending.subtitle,
         items: items.filter((item) => item.isTrending),
       },
       {
         id: 'science',
-        title: 'Science Labs',
-        subtitle: 'Physics, chemistry, biology, and concept builders',
+        title: APP_STRINGS.search.rails.science.title,
+        subtitle: APP_STRINGS.search.rails.science.subtitle,
         items: items.filter((item) =>
           item.genres.some((genre) => ['Physics', 'Chemistry', 'Biology', 'Science'].includes(genre)),
         ),
       },
       {
         id: 'exam',
-        title: 'Exam Prep',
-        subtitle: 'NEET, JEE, revision, and timed practice',
+        title: APP_STRINGS.search.rails.exam.title,
+        subtitle: APP_STRINGS.search.rails.exam.subtitle,
         items: items.filter((item) =>
           item.genres.some((genre) => ['Exams', 'NEET', 'JEE', 'Revision'].includes(genre)),
         ),
       },
       {
         id: 'career',
-        title: 'Career and Communication',
-        subtitle: 'Data, finance, public speaking, and job-ready skills',
+        title: APP_STRINGS.search.rails.career.title,
+        subtitle: APP_STRINGS.search.rails.career.subtitle,
         items: items.filter((item) =>
           item.genres.some((genre) =>
             ['Data Science', 'Finance', 'Communication', 'Soft Skills', 'Business'].includes(genre),
@@ -111,8 +112,8 @@ export default function SearchScreen() {
       },
       {
         id: 'all',
-        title: 'All Learning',
-        subtitle: 'Everything in the mock catalog',
+        title: APP_STRINGS.search.rails.all.title,
+        subtitle: APP_STRINGS.search.rails.all.subtitle,
         items,
       },
     ],
@@ -142,7 +143,7 @@ export default function SearchScreen() {
   if (error) {
     return (
       <View className="flex-1 px-5 pt-16" style={{ backgroundColor: colors.background }}>
-        <ErrorState title="Search unavailable" message={error} onRetry={() => setError(null)} />
+        <ErrorState title={APP_STRINGS.errors.searchUnavailable} message={error} onRetry={() => setError(null)} />
       </View>
     );
   }
@@ -156,10 +157,10 @@ export default function SearchScreen() {
           borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.1)',
         }}>
         <Text className="text-3xl font-black" style={{ color: colors.text }}>
-          Search
+          {APP_STRINGS.search.title}
         </Text>
         <Text className="mt-1 text-sm font-semibold" style={{ color: colors.textMuted }}>
-          Find lessons, live challenges, documentaries, and exam tracks.
+          {APP_STRINGS.search.subtitle}
         </Text>
 
         <View
@@ -172,7 +173,7 @@ export default function SearchScreen() {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search by title, skill, language..."
+            placeholder={APP_STRINGS.search.placeholder}
             placeholderTextColor="#64748B"
             className="ml-3 h-12 flex-1 text-base font-semibold"
             style={{ color: colors.text }}
@@ -182,7 +183,7 @@ export default function SearchScreen() {
           {query ? (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Clear search"
+              accessibilityLabel={APP_STRINGS.accessibility.clearSearch}
               className="h-9 w-9 items-center justify-center"
               onPress={() => {
                 selectionHaptic();
@@ -204,23 +205,23 @@ export default function SearchScreen() {
           filteredItems.length ? (
             <View className="pt-5">
               <Text className="mb-4 px-5 text-sm font-bold" style={{ color: colors.textMuted }}>
-                {`Showing results for "${query.trim()}"`}
+                {APP_STRINGS.search.resultLabel(query.trim())}
               </Text>
               <SearchRail
                 items={filteredItems}
                 renderItem={renderItem}
-                subtitle="Matching titles from the full EdStream catalog"
-                title="Search Results"
+                subtitle={APP_STRINGS.search.resultSubtitle}
+                title={APP_STRINGS.search.resultTitle}
               />
             </View>
           ) : (
             <View className="px-5 pt-10">
               <Text className="mb-4 text-sm font-bold" style={{ color: colors.textMuted }}>
-                {`Showing results for "${query.trim()}"`}
+                {APP_STRINGS.search.resultLabel(query.trim())}
               </Text>
               <EmptyState
-                title="No matches"
-                message="Try searching another topic, language, or learning track."
+                title={APP_STRINGS.empty.noMatchesTitle}
+                message={APP_STRINGS.empty.noMatchesMessage}
               />
             </View>
           )

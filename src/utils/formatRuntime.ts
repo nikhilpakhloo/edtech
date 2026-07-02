@@ -1,18 +1,20 @@
+import { APP_STRINGS } from '@/constants/string';
+
 export function formatRuntime(minutes?: number, seasonCount?: number) {
   if (seasonCount) {
-    return `${seasonCount} season${seasonCount > 1 ? 's' : ''}`;
+    return APP_STRINGS.format.season(seasonCount);
   }
 
   if (!minutes) {
-    return 'Live';
+    return APP_STRINGS.common.live;
   }
 
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
 
   if (!hours) {
-    return `${remainingMinutes}m`;
+    return APP_STRINGS.format.minutes(remainingMinutes);
   }
 
-  return `${hours}h ${remainingMinutes}m`;
+  return APP_STRINGS.format.hoursMinutes(hours, remainingMinutes);
 }

@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
 
 import { MetadataPill } from '@/components/media/MetadataPill';
+import { APP_STRINGS } from '@/constants/string';
 import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem } from '@/types/media';
 import { formatRuntime } from '@/utils/formatRuntime';
@@ -55,15 +56,15 @@ function HeroBannerBase({ item }: HeroBannerProps) {
           </View>
           <View className="ml-3 flex-1">
             <Text className="text-xl font-black" style={{ color: colors.text }}>
-              EdStream
+              {APP_STRINGS.brand.name}
             </Text>
             <Text className="text-xs font-bold uppercase tracking-[2px] text-brand-cyan">
-              Learn like cinema
+              {APP_STRINGS.brand.tagline}
             </Text>
           </View>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Search"
+            accessibilityLabel={APP_STRINGS.tabs.search}
             className="h-10 w-10 items-center justify-center rounded-full bg-black/45">
             <Ionicons name="search" color="#FFFFFF" size={20} />
           </Pressable>
@@ -73,7 +74,7 @@ function HeroBannerBase({ item }: HeroBannerProps) {
           <View className="mb-3 flex-row items-center">
             <View className="rounded bg-brand-gold px-2 py-1">
               <Text className="text-[10px] font-black uppercase text-brand-ink">
-                Spotlight
+                {APP_STRINGS.media.spotlight}
               </Text>
             </View>
             <Text className="ml-2 text-xs font-bold uppercase tracking-[2px] text-brand-cyan">
@@ -84,7 +85,9 @@ function HeroBannerBase({ item }: HeroBannerProps) {
             {item.title}
           </Text>
           <View className="mt-4 flex-row flex-wrap">
-            <Text className="mr-3 text-sm font-black text-brand-gold">Premium</Text>
+            <Text className="mr-3 text-sm font-black text-brand-gold">
+              {APP_STRINGS.media.premium}
+            </Text>
             <MetadataPill label={`${item.releaseYear}`} />
             <MetadataPill label={item.rating} />
             <MetadataPill label={formatRuntime(item.runtimeMinutes, item.seasonCount)} />
@@ -111,7 +114,7 @@ function HeroBannerBase({ item }: HeroBannerProps) {
               labelStyle={{ fontSize: 14, fontWeight: '800' }}
               icon="plus"
               onPress={handleOpen}>
-              Watchlist
+              {APP_STRINGS.media.watchlist}
             </Button>
           </View>
         </View>

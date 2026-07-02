@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { APP_STRINGS } from '@/constants/string';
 import { apiService } from '@/data/apiService';
 import type { HomeFeedResponse } from '@/types/media';
 
@@ -32,7 +33,7 @@ export function useHomeFeed() {
     } catch (error) {
       setState((current) => ({
         data: mode === 'refresh' ? current.data : null,
-        error: error instanceof Error ? error.message : 'Unable to load EdStream.',
+        error: error instanceof Error ? error.message : APP_STRINGS.errors.unableToLoadEdStream,
         isLoading: false,
         isRefreshing: false,
       }));
@@ -54,7 +55,7 @@ export function useHomeFeed() {
           if (isMounted) {
             setState({
               data: null,
-              error: error instanceof Error ? error.message : 'Unable to load EdStream.',
+              error: error instanceof Error ? error.message : APP_STRINGS.errors.unableToLoadEdStream,
               isLoading: false,
               isRefreshing: false,
             });

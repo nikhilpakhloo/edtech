@@ -17,6 +17,7 @@ import { Screen } from "@/components/layout/Screen";
 import { LearningVideoPlayer } from "@/components/media/LearningVideoPlayer";
 import { MediaRail } from "@/components/media/MediaRail";
 import { MetadataPill } from "@/components/media/MetadataPill";
+import { APP_STRINGS } from "@/constants/string";
 import { DetailAnimatedHeader } from "@/features/detail/components/DetailAnimatedHeader";
 import { useMediaDetail } from "@/features/detail/hooks/useMediaDetail";
 import { useAppTheme } from "@/theme/AppTheme";
@@ -54,9 +55,9 @@ export default function DetailScreen() {
       <Screen>
         <Stack.Screen options={{ headerShown: false }} />
         <ErrorState
-          title="Title unavailable"
-          message={error ?? "We could not find this EdStream title."}
-          actionLabel="Retry"
+          title={APP_STRINGS.errors.titleUnavailable}
+          message={error ?? APP_STRINGS.errors.titleNotFound}
+          actionLabel={APP_STRINGS.common.retry}
           onRetry={retry}
         />
       </Screen>
@@ -97,7 +98,7 @@ export default function DetailScreen() {
             <MetadataPill label={item.languages.join(" / ")} />
             <MetadataPill label={item.kind.toUpperCase()} />
             {item.episodeCount ? (
-              <MetadataPill label={`${item.episodeCount} episodes`} />
+              <MetadataPill label={APP_STRINGS.detail.episodeLabel(item.episodeCount)} />
             ) : null}
           </View>
 
@@ -117,18 +118,18 @@ export default function DetailScreen() {
               borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
             }}>
             <Text className="text-lg font-bold" style={{ color: colors.text }}>
-              Metadata
+              {APP_STRINGS.detail.metadataTitle}
             </Text>
             <Text className="mt-3 text-sm leading-6" style={{ color: colors.textMuted }}>
               {item.kind.toUpperCase()} - {item.maturityNote}
-              {item.episodeCount ? ` - ${item.episodeCount} episodes` : ""}
+              {item.episodeCount ? ` - ${APP_STRINGS.detail.episodeLabel(item.episodeCount)}` : ""}
             </Text>
           </View>
         </View>
 
         <View className="mt-8">
           <MediaRail
-            rail={{ id: "related", title: "More Like This", items: related }}
+            rail={{ id: "related", title: APP_STRINGS.detail.relatedTitle, items: related }}
             onSelectMedia={handleSelectMedia}
           />
         </View>

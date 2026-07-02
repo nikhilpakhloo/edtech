@@ -1,3 +1,4 @@
+import { APP_STRINGS } from '@/constants/string';
 import type { HomeFeedResponse, MediaItem, ProfileResponse } from '@/types/media';
 
 const mediaItems: MediaItem[] = [
@@ -445,8 +446,8 @@ export const HOME_FEED: HomeFeedResponse = {
   rails: [
     {
       id: 'continue-learning',
-      title: 'Continue Learning',
-      subtitle: 'Pick up from your last session',
+      title: APP_STRINGS.home.rails.continueLearningLast.title,
+      subtitle: APP_STRINGS.home.rails.continueLearningLast.subtitle,
       items: [
         MEDIA_BY_ID['future-of-ai'],
         MEDIA_BY_ID['react-native-shiproom'],
@@ -457,8 +458,8 @@ export const HOME_FEED: HomeFeedResponse = {
     },
     {
       id: 'trending-now',
-      title: 'Trending on EdStream',
-      subtitle: 'Popular across classrooms this week',
+      title: APP_STRINGS.home.rails.trendingOnEdStream.title,
+      subtitle: APP_STRINGS.home.rails.trendingOnEdStream.subtitle,
       items: [
         MEDIA_BY_ID['math-premier-league'],
         MEDIA_BY_ID['startup-casefiles'],
@@ -470,7 +471,7 @@ export const HOME_FEED: HomeFeedResponse = {
     },
     {
       id: 'frontend-masters',
-      title: 'Frontend and Product',
+      title: APP_STRINGS.home.rails.frontendAndProduct.title,
       items: [
         MEDIA_BY_ID['design-systems-lab'],
         MEDIA_BY_ID['react-native-shiproom'],
@@ -481,7 +482,7 @@ export const HOME_FEED: HomeFeedResponse = {
     },
     {
       id: 'documentary-picks',
-      title: 'Documentaries That Teach',
+      title: APP_STRINGS.home.rails.documentaryPicksDefault.title,
       items: [
         MEDIA_BY_ID['history-in-motion'],
         MEDIA_BY_ID['future-of-ai'],
@@ -492,8 +493,8 @@ export const HOME_FEED: HomeFeedResponse = {
     },
     {
       id: 'exam-and-skills',
-      title: 'Exam Prep and Life Skills',
-      subtitle: 'Focused tracks for tests, confidence, and career readiness',
+      title: APP_STRINGS.home.rails.examAndSkills.title,
+      subtitle: APP_STRINGS.home.rails.examAndSkills.subtitle,
       items: [
         MEDIA_BY_ID['neet-biology-rapid'],
         MEDIA_BY_ID['jee-problem-solving'],
@@ -512,28 +513,28 @@ export const PROFILE: ProfileResponse = {
   settings: [
     {
       id: 'autoplay',
-      title: 'Autoplay previews',
-      description: 'Show muted previews on content rails',
-      value: 'On',
+      title: APP_STRINGS.profile.settings.autoplay.title,
+      description: APP_STRINGS.profile.settings.autoplay.description,
+      value: APP_STRINGS.profile.settings.autoplay.value,
       enabled: true,
     },
     {
       id: 'quality',
-      title: 'Streaming quality',
-      description: 'Optimized for Wi-Fi and mobile data',
-      value: 'High',
+      title: APP_STRINGS.profile.settings.quality.title,
+      description: APP_STRINGS.profile.settings.quality.description,
+      value: APP_STRINGS.profile.settings.quality.value,
     },
     {
       id: 'downloads',
-      title: 'Download quality',
-      description: 'Ready for offline revision sessions',
-      value: 'Standard',
+      title: APP_STRINGS.profile.settings.downloads.title,
+      description: APP_STRINGS.profile.settings.downloads.description,
+      value: APP_STRINGS.profile.settings.downloads.value,
     },
     {
       id: 'language',
-      title: 'Preferred languages',
-      description: 'Used to personalize your rails',
-      value: 'English, Hindi',
+      title: APP_STRINGS.profile.settings.language.title,
+      description: APP_STRINGS.profile.settings.language.description,
+      value: APP_STRINGS.profile.settings.language.value,
     },
   ],
 };

@@ -6,6 +6,7 @@ import { Avatar, Switch } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Screen } from '@/components/layout/Screen';
+import { APP_STRINGS } from '@/constants/string';
 import { apiService } from '@/data/apiService';
 import { useAppTheme } from '@/theme/AppTheme';
 import type { ProfileResponse } from '@/types/media';
@@ -13,9 +14,9 @@ import { selectionHaptic } from '@/utils/haptics';
 import { getTabBarContentPadding } from '@/utils/tabBar';
 
 const learnerStats = [
-  { label: 'Streak', value: '8', suffix: 'days' },
-  { label: 'Saved', value: '4', suffix: 'offline' },
-  { label: 'Progress', value: '68', suffix: '%' },
+  { label: APP_STRINGS.profile.stats.streak.label, value: '8', suffix: APP_STRINGS.profile.stats.streak.suffix },
+  { label: APP_STRINGS.profile.stats.saved.label, value: '4', suffix: APP_STRINGS.profile.stats.saved.suffix },
+  { label: APP_STRINGS.profile.stats.progress.label, value: '68', suffix: APP_STRINGS.profile.stats.progress.suffix },
 ];
 
 const quickActions: {
@@ -27,22 +28,22 @@ const quickActions: {
 }[] = [
   {
     id: 'downloads',
-    label: 'Downloads',
-    caption: 'Ready offline',
+    label: APP_STRINGS.profile.quickActions.downloads.label,
+    caption: APP_STRINGS.profile.quickActions.downloads.caption,
     icon: 'download-outline',
     colors: ['#1F80E0', '#00C2FF'],
   },
   {
     id: 'watchlist',
-    label: 'Watchlist',
-    caption: 'Saved lessons',
+    label: APP_STRINGS.profile.quickActions.watchlist.label,
+    caption: APP_STRINGS.profile.quickActions.watchlist.caption,
     icon: 'bookmark-outline',
     colors: ['#F5C542', '#F97316'],
   },
   {
     id: 'certificates',
-    label: 'Certificates',
-    caption: 'Achievements',
+    label: APP_STRINGS.profile.quickActions.certificates.label,
+    caption: APP_STRINGS.profile.quickActions.certificates.caption,
     icon: 'ribbon-outline',
     colors: ['#22C55E', '#14B8A6'],
   },
@@ -97,13 +98,13 @@ export default function ProfileScreen() {
         }}>
         <View className="mb-5">
           <Text className="text-[13px] font-black uppercase tracking-[2px] text-brand-cyan">
-            Your learning hub
+            {APP_STRINGS.profile.eyebrow}
           </Text>
           <Text className="mt-1 text-3xl font-black" style={{ color: colors.text }}>
-            My Space
+            {APP_STRINGS.profile.title}
           </Text>
           <Text className="mt-2 text-sm leading-5" style={{ color: colors.textMuted }}>
-            Track progress, manage downloads, and tune your EdStream experience.
+            {APP_STRINGS.profile.subtitle}
           </Text>
         </View>
 
@@ -130,7 +131,7 @@ export default function ProfileScreen() {
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Edit profile"
+              accessibilityLabel={APP_STRINGS.accessibility.editProfile}
               className="h-10 w-10 items-center justify-center rounded-full bg-white/10"
               onPress={selectionHaptic}>
               <Ionicons name="create-outline" color="#FFFFFF" size={20} />
@@ -179,10 +180,10 @@ export default function ProfileScreen() {
 
         <View className="mt-7">
           <Text className="text-xl font-black" style={{ color: colors.text }}>
-            Preferences
+            {APP_STRINGS.profile.preferencesTitle}
           </Text>
           <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
-            Personalize playback, language, and downloads.
+            {APP_STRINGS.profile.preferencesSubtitle}
           </Text>
         </View>
 
@@ -243,10 +244,10 @@ export default function ProfileScreen() {
             </View>
             <View className="ml-3 flex-1">
               <Text className="text-base font-black" style={{ color: colors.text }}>
-                Keep your streak alive
+                {APP_STRINGS.profile.streakTitle}
               </Text>
               <Text className="mt-1 text-sm leading-5" style={{ color: colors.textMuted }}>
-                Finish one lesson today to unlock your next weekly milestone.
+                {APP_STRINGS.profile.streakMessage}
               </Text>
             </View>
           </View>

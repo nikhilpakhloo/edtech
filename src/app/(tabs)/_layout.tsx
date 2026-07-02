@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { APP_STRINGS } from '@/constants/string';
 import { useAppTheme } from '@/theme/AppTheme';
 import { selectionHaptic } from '@/utils/haptics';
 
@@ -51,7 +52,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="search"
         options={{
-          title: 'Search',
+          title: APP_STRINGS.tabs.search,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="search" color={String(color)} size={size + 1} />
           ),
@@ -60,7 +61,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: APP_STRINGS.tabs.home,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" color={String(color)} size={size + 2} />
           ),
@@ -69,7 +70,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'My Space',
+          title: APP_STRINGS.tabs.profile,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" color={String(color)} size={size + 1} />
           ),

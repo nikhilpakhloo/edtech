@@ -5,6 +5,7 @@ import { FlatList, Pressable, Text, View } from 'react-native';
 
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { MediaCard } from '@/components/media/MediaCard';
+import { APP_STRINGS } from '@/constants/string';
 import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem, MediaRail as MediaRailType } from '@/types/media';
 import { selectionHaptic } from '@/utils/haptics';
@@ -35,8 +36,8 @@ function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
           </Text>
         </View>
         <EmptyState
-          title="Nothing here yet"
-          message="This rail is ready, but the mock service did not return titles for it."
+          title={APP_STRINGS.empty.railTitle}
+          message={APP_STRINGS.empty.railMessage}
         />
       </View>
     );
@@ -57,11 +58,11 @@ function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`View all ${rail.title}`}
+          accessibilityLabel={APP_STRINGS.accessibility.viewAllRail(rail.title)}
           className="min-h-10 justify-center px-1"
           onPress={handleViewAll}>
           <Text className="text-xs font-black uppercase tracking-[1.5px] text-brand-blue">
-            View all
+            {APP_STRINGS.common.viewAll}
           </Text>
         </Pressable>
       </View>

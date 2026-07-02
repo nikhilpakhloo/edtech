@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 
+import { APP_STRINGS } from '@/constants/string';
 import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem } from '@/types/media';
 import { formatRuntime } from '@/utils/formatRuntime';
@@ -20,7 +21,7 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Open ${item.title}`}
+      accessibilityLabel={APP_STRINGS.accessibility.openTitle(item.title)}
       className="mr-3 w-32"
       style={({ pressed }) => [pressed && styles.pressed]}
       onPress={() => {
@@ -44,12 +45,16 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
         {item.isPremium ? (
           <View className="absolute left-2 top-2 flex-row items-center rounded bg-brand-gold px-2 py-1">
             <Ionicons name="flash" color="#030712" size={10} />
-            <Text className="ml-1 text-[10px] font-black uppercase text-brand-ink">VIP</Text>
+            <Text className="ml-1 text-[10px] font-black uppercase text-brand-ink">
+              {APP_STRINGS.media.premiumBadge}
+            </Text>
           </View>
         ) : null}
         {item.isTrending ? (
           <View className="absolute right-2 top-2 rounded-full bg-brand-blue px-2 py-1">
-            <Text className="text-[10px] font-black uppercase text-white">Top</Text>
+            <Text className="text-[10px] font-black uppercase text-white">
+              {APP_STRINGS.media.trendingBadge}
+            </Text>
           </View>
         ) : null}
         <View className="absolute bottom-0 left-0 right-0 h-16 bg-black/45" />
