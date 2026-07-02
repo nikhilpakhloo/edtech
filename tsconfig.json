@@ -4,6 +4,9 @@
     "strict": true,
     "jsxImportSource": "nativewind",
     "resolveJsonModule": true,
+    "types": [
+      "jest"
+    ],
     "paths": {
       "@/*": [
         "./src/*"
