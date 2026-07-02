@@ -5,7 +5,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { Divider } from "react-native-paper";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
@@ -21,26 +20,46 @@ import { APP_STRINGS } from "@/constants/string";
 import { DetailAnimatedHeader } from "@/features/detail/components/DetailAnimatedHeader";
 import { useMediaDetail } from "@/features/detail/hooks/useMediaDetail";
 import { useAppTheme } from "@/theme/AppTheme";
-import type { MediaItem } from "@/types/media";
+import type {
+  DetailContentSection,
+  DetailMetadataGroup,
+  MediaItem,
+} from "@/types/media";
+import { selectionHaptic } from "@/utils/haptics";
+import { useResponsiveMetrics } from "@/utils/responsive";
+
+const VIDEO_CONTROL_TOP = 8;
 
 export default function DetailScreen() {
-  const videoControlTop = 8;
   const { colors, isDark } = useAppTheme();
+  const metrics = useResponsiveMetrics();
   const { mediaId } = useLocalSearchParams<{ mediaId: string }>();
-  const { error, isLoading, item, related, retry } = useMediaDetail(mediaId);
+  const { detail, error, isLoading, item, related, retry } =
+    useMediaDetail(mediaId);
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
     },
   });
+  const handleBack = useCallback(() => {
+    selectionHaptic();
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace("/");
+  }, []);
+  const handleHeaderAction = useCallback(() => {
+    selectionHaptic();
+  }, []);
   const handleSelectMedia = useCallback((selectedItem: MediaItem) => {
     router.push({
       pathname: "/detail/[mediaId]",
       params: { mediaId: selectedItem.id },
     } as unknown as Href);
   }, []);
-
   if (isLoading) {
     return (
       <Screen edges={["left", "right"]}>
@@ -50,7 +69,7 @@ export default function DetailScreen() {
     );
   }
 
-  if (error || !item) {
+  if (error || !item || !detail) {
     return (
       <Screen>
         <Stack.Screen options={{ headerShown: false }} />
@@ -72,7 +91,12 @@ export default function DetailScreen() {
         barStyle={isDark ? "light-content" : "dark-content"}
         translucent
       />
-      <DetailAnimatedHeader title={item.title} scrollY={scrollY} />
+      <DetailAnimatedHeader
+        title={item.title}
+        scrollY={scrollY}
+        onBack={handleBack}
+        onAction={handleHeaderAction}
+      />
       <View className="bg-black">
         <LearningVideoPlayer
           title={item.title}
@@ -81,7 +105,7 @@ export default function DetailScreen() {
           posterUrl={item.backdropUrl}
           autoPlay
           elevated
-          controlsTop={videoControlTop}
+          controlsTop={VIDEO_CONTROL_TOP}
         />
       </View>
 
@@ -91,49 +115,140 @@ export default function DetailScreen() {
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 36 }}
+        contentContainerStyle={{ paddingBottom: metrics.isCompact ? 28 : 36 }}
       >
-        <View className="px-5 pt-5">
-          <View className="mt-5 flex-row flex-wrap">
-            <MetadataPill label={item.languages.join(" / ")} />
+        <View
+          style={{
+            paddingHorizontal: metrics.horizontalPadding,
+            paddingTop: metrics.isCompact ? 16 : 20,
+          }}
+        >
+          <View className="flex-row flex-wrap">
+            <MetadataPill label={item.eyebrow} />
             <MetadataPill label={item.kind.toUpperCase()} />
+            <MetadataPill label={item.rating} />
             {item.episodeCount ? (
-              <MetadataPill label={APP_STRINGS.detail.episodeLabel(item.episodeCount)} />
+              <MetadataPill
+                label={APP_STRINGS.detail.episodeLabel(item.episodeCount)}
+              />
             ) : null}
           </View>
 
-          <Text className="mt-5 text-base leading-7" style={{ color: colors.text }}>
-            {item.description}
-          </Text>
-          <Text className="mt-4 text-sm font-semibold uppercase tracking-[1.5px] text-brand-cyan">
-            {item.genres.join(" - ")}
-          </Text>
-
-          <Divider className="my-6" style={{ backgroundColor: colors.border }} />
-
-          <View
-            className="rounded-lg border p-4"
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
-            }}>
-            <Text className="text-lg font-bold" style={{ color: colors.text }}>
-              {APP_STRINGS.detail.metadataTitle}
-            </Text>
-            <Text className="mt-3 text-sm leading-6" style={{ color: colors.textMuted }}>
-              {item.kind.toUpperCase()} - {item.maturityNote}
-              {item.episodeCount ? ` - ${APP_STRINGS.detail.episodeLabel(item.episodeCount)}` : ""}
-            </Text>
-          </View>
+          <MetadataGroups groups={detail.metadataGroups} />
+          <ContentSections sections={detail.sections} />
         </View>
 
-        <View className="mt-8">
+        <View style={{ marginTop: metrics.isCompact ? 24 : 32 }}>
           <MediaRail
-            rail={{ id: "related", title: APP_STRINGS.detail.relatedTitle, items: related }}
+            rail={{
+              id: "related",
+              title: APP_STRINGS.detail.relatedTitle,
+              items: related,
+            }}
             onSelectMedia={handleSelectMedia}
           />
         </View>
       </Animated.ScrollView>
     </Screen>
+  );
+}
+
+function MetadataGroups({ groups }: { groups: DetailMetadataGroup[] }) {
+  const { colors, isDark } = useAppTheme();
+  const metrics = useResponsiveMetrics();
+
+  return (
+    <View
+      className="rounded-lg border p-4"
+      style={{
+        backgroundColor: colors.surface,
+        borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
+        marginTop: metrics.isCompact ? 10 : 12,
+      }}
+    >
+      <View>
+        {groups.map((group, index) => (
+          <View
+            key={group.id}
+            style={{
+              alignItems: "flex-start",
+              flexDirection: "row",
+              marginTop: index ? 14 : 0,
+            }}
+          >
+            <Text
+              className="text-xs font-black uppercase tracking-[1px]"
+              style={{
+                color: colors.textMuted,
+                lineHeight: 24,
+                marginRight: metrics.isCompact ? 10 : 12,
+                width: metrics.isCompact ? 78 : 96,
+              }}
+            >
+              {group.title}
+            </Text>
+            <View
+              className="flex-1 flex-row flex-wrap"
+              style={{ alignItems: "center" }}
+            >
+              {group.values.map((value) => (
+                <MetadataPill key={`${group.id}-${value}`} label={value} />
+              ))}
+            </View>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function ContentSections({ sections }: { sections: DetailContentSection[] }) {
+  const { colors, isDark } = useAppTheme();
+  const metrics = useResponsiveMetrics();
+
+  return (
+    <View style={{ marginTop: metrics.isCompact ? 14 : 16 }}>
+      {sections.map((section, index) => (
+        <View
+          key={section.id}
+          className="rounded-lg border p-4"
+          style={{
+            backgroundColor: colors.elevated,
+            borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
+            marginTop: index ? (metrics.isCompact ? 10 : 12) : 0,
+          }}
+        >
+          <Text className="text-lg font-black" style={{ color: colors.text }}>
+            {section.title}
+          </Text>
+          {section.body ? (
+            <Text
+              className="mt-3 text-base"
+              style={{
+                color: colors.textMuted,
+                lineHeight: metrics.isCompact ? 24 : 26,
+              }}
+            >
+              {section.body}
+            </Text>
+          ) : null}
+          {section.bullets?.length ? (
+            <View className="mt-3">
+              {section.bullets.map((bullet) => (
+                <View key={bullet} className="mb-2 flex-row">
+                  <View className="mr-3 mt-2 h-1.5 w-1.5 rounded-full bg-brand-cyan" />
+                  <Text
+                    className="flex-1 text-sm leading-6"
+                    style={{ color: colors.textMuted }}
+                  >
+                    {bullet}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      ))}
+    </View>
   );
 }

@@ -10,6 +10,7 @@ import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem, MediaRail as MediaRailType } from '@/types/media';
 import { selectionHaptic } from '@/utils/haptics';
 import { HOME_RAIL_LIST_PROPS } from '@/utils/listPerf';
+import { useResponsiveMetrics } from '@/utils/responsive';
 
 type MediaRailProps = {
   rail: MediaRailType;
@@ -18,6 +19,7 @@ type MediaRailProps = {
 
 function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
   const { colors } = useAppTheme();
+  const metrics = useResponsiveMetrics();
   const renderItem = useCallback<ListRenderItem<MediaItem>>(
     ({ item }) => <MediaCard item={item} onPress={onSelectMedia} />,
     [onSelectMedia],
@@ -29,8 +31,8 @@ function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
 
   if (!rail.items.length) {
     return (
-      <View className="mb-7">
-        <View className="mb-3 px-5">
+      <View style={{ marginBottom: metrics.isCompact ? 24 : 28 }}>
+        <View style={{ marginBottom: 12, paddingHorizontal: metrics.horizontalPadding }}>
           <Text className="text-lg font-bold" style={{ color: colors.text }}>
             {rail.title}
           </Text>
@@ -44,8 +46,10 @@ function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
   }
 
   return (
-    <View className="mb-8">
-      <View className="mb-3 flex-row items-end justify-between px-5">
+    <View style={{ marginBottom: metrics.isCompact ? 24 : 32 }}>
+      <View
+        className="flex-row items-end justify-between"
+        style={{ marginBottom: 12, paddingHorizontal: metrics.horizontalPadding }}>
         <View className="flex-1 pr-4">
           <Text className="text-xl font-black" style={{ color: colors.text }}>
             {rail.title}
@@ -76,7 +80,7 @@ function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
           length: 140,
           offset: 140 * index,
         })}
-        contentContainerStyle={{ paddingHorizontal: 20 }}
+        contentContainerStyle={{ paddingHorizontal: metrics.horizontalPadding }}
       />
     </View>
   );

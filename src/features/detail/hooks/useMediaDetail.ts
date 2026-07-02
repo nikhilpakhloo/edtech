@@ -2,9 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { APP_STRINGS } from '@/constants/string';
 import { apiService } from '@/data/apiService';
-import type { MediaItem } from '@/types/media';
+import type { MediaDetailResponse, MediaItem } from '@/types/media';
 
 type MediaDetailState = {
+  detail: MediaDetailResponse | null;
   item: MediaItem | null;
   related: MediaItem[];
   error: string | null;
@@ -13,6 +14,7 @@ type MediaDetailState = {
 
 export function useMediaDetail(mediaId?: string) {
   const [state, setState] = useState<MediaDetailState>({
+    detail: null,
     item: null,
     related: [],
     error: null,
@@ -22,6 +24,7 @@ export function useMediaDetail(mediaId?: string) {
   const loadDetail = useCallback(async () => {
     if (!mediaId) {
       setState({
+        detail: null,
         item: null,
         related: [],
         error: APP_STRINGS.errors.missingMediaId,
@@ -33,13 +36,17 @@ export function useMediaDetail(mediaId?: string) {
     setState((current) => ({ ...current, error: null, isLoading: true }));
 
     try {
-      const [item, related] = await Promise.all([
-        apiService.getMediaDetail(mediaId),
-        apiService.getRelatedMedia(mediaId),
-      ]);
-      setState({ item, related, error: null, isLoading: false });
+      const detail = await apiService.getMediaDetailView(mediaId);
+      setState({
+        detail,
+        item: detail.item,
+        related: detail.related,
+        error: null,
+        isLoading: false,
+      });
     } catch (error) {
       setState({
+        detail: null,
         item: null,
         related: [],
         error: error instanceof Error ? error.message : APP_STRINGS.errors.unableToLoadTitle,
@@ -55,6 +62,7 @@ export function useMediaDetail(mediaId?: string) {
       if (!mediaId) {
         if (isMounted) {
           setState({
+            detail: null,
             item: null,
             related: [],
             error: APP_STRINGS.errors.missingMediaId,
@@ -64,15 +72,23 @@ export function useMediaDetail(mediaId?: string) {
         return;
       }
 
-      Promise.all([apiService.getMediaDetail(mediaId), apiService.getRelatedMedia(mediaId)])
-        .then(([item, related]) => {
+      apiService
+        .getMediaDetailView(mediaId)
+        .then((detail) => {
           if (isMounted) {
-            setState({ item, related, error: null, isLoading: false });
+            setState({
+              detail,
+              item: detail.item,
+              related: detail.related,
+              error: null,
+              isLoading: false,
+            });
           }
         })
         .catch((error: unknown) => {
           if (isMounted) {
             setState({
+              detail: null,
               item: null,
               related: [],
               error: error instanceof Error ? error.message : APP_STRINGS.errors.unableToLoadTitle,

@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Pressable, Text, View } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -7,19 +8,26 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { APP_STRINGS } from "@/constants/string";
 import { useAppTheme } from "@/theme/AppTheme";
+import { useResponsiveMetrics } from "@/utils/responsive";
 
 type DetailAnimatedHeaderProps = {
+  onAction: () => void;
+  onBack: () => void;
   title: string;
   scrollY: SharedValue<number>;
 };
 
 export function DetailAnimatedHeader({
+  onAction,
+  onBack,
   title,
   scrollY,
 }: DetailAnimatedHeaderProps) {
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useAppTheme();
+  const metrics = useResponsiveMetrics();
   const expandedHeight = insets.top + 56;
 
   const idleStyle = useAnimatedStyle(() => {
@@ -68,13 +76,13 @@ export function DetailAnimatedHeader({
       style={{ backgroundColor: colors.background, height: expandedHeight }}
     >
       <Animated.View
-        pointerEvents="none"
-        className="absolute inset-0 border-b px-5"
+        className="absolute inset-0 border-b"
         style={[
           idleStyle,
           {
             backgroundColor: colors.background,
             borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(15,23,42,0.1)",
+            paddingHorizontal: metrics.horizontalPadding,
           },
         ]}
       >
@@ -82,28 +90,37 @@ export function DetailAnimatedHeader({
           className="flex-row items-center"
           style={{ paddingTop: insets.top + 14 }}
         >
-          <View className="h-8 w-8 items-center justify-center rounded-md bg-white">
-            <Text className="text-base font-black text-brand-blue">E</Text>
-          </View>
+          <Pressable
+            accessibilityRole="button"
+            className="h-9 w-9 items-center justify-center rounded-full bg-black/35"
+            onPress={onBack}>
+            <Ionicons name="chevron-back" color={colors.text} size={22} />
+          </Pressable>
           <View className="ml-3 flex-1">
             <Text className="text-sm font-black" style={{ color: colors.text }}>
-              EdStream
+              {APP_STRINGS.brand.name}
             </Text>
             <Text className="mt-0.5 text-[11px] font-bold uppercase tracking-[1.6px] text-brand-cyan">
-              Now watching
+              {APP_STRINGS.detail.nowWatching}
             </Text>
           </View>
+          <Pressable
+            accessibilityRole="button"
+            className="h-9 w-9 items-center justify-center rounded-full bg-black/35"
+            onPress={onAction}>
+            <Ionicons name="bookmark-outline" color={colors.text} size={19} />
+          </Pressable>
         </View>
       </Animated.View>
       <Animated.View
-        pointerEvents="none"
-        className="h-full border-b px-5"
+        className="h-full border-b"
         style={[
           headerStyle,
           {
             backgroundColor: isDark ? "rgba(3,7,18,0.94)" : "rgba(255,255,255,0.94)",
             borderBottomColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(15,23,42,0.12)",
             elevation: 10,
+            paddingHorizontal: metrics.horizontalPadding,
             shadowColor: "#000000",
             shadowOffset: { height: 8, width: 0 },
             shadowOpacity: isDark ? 0.28 : 0.12,
@@ -115,12 +132,15 @@ export function DetailAnimatedHeader({
           className="flex-row items-center"
           style={{ paddingTop: insets.top + 10 }}
         >
-          <View className="h-9 w-9 items-center justify-center rounded-md bg-brand-blue">
-            <Text className="text-base font-black text-white">E</Text>
-          </View>
+          <Pressable
+            accessibilityRole="button"
+            className="h-9 w-9 items-center justify-center rounded-full bg-brand-blue"
+            onPress={onBack}>
+            <Ionicons name="chevron-back" color="#FFFFFF" size={22} />
+          </Pressable>
           <View className="ml-3 flex-1">
             <Text className="text-[10px] font-black uppercase tracking-[1.5px] text-brand-cyan">
-              Now watching
+              {APP_STRINGS.detail.nowWatching}
             </Text>
             <Text
               numberOfLines={1}
@@ -130,6 +150,12 @@ export function DetailAnimatedHeader({
               {title}
             </Text>
           </View>
+          <Pressable
+            accessibilityRole="button"
+            className="h-9 w-9 items-center justify-center rounded-full bg-brand-blue/20"
+            onPress={onAction}>
+            <Ionicons name="bookmark-outline" color={colors.text} size={19} />
+          </Pressable>
         </View>
       </Animated.View>
     </Animated.View>

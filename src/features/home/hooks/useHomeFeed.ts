@@ -2,53 +2,139 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { APP_STRINGS } from '@/constants/string';
 import { apiService } from '@/data/apiService';
-import type { HomeFeedResponse } from '@/types/media';
+import type { HomeFeedResponse, HomeModeId } from '@/types/media';
 
 type HomeFeedState = {
   data: HomeFeedResponse | null;
   error: string | null;
+  hasMore: boolean;
   isLoading: boolean;
+  isLoadingMore: boolean;
   isRefreshing: boolean;
+  nextPage: number;
 };
 
-export function useHomeFeed() {
+const HOME_RAIL_PAGE_SIZE = 6;
+
+export function useHomeFeed(mode: HomeModeId) {
   const [state, setState] = useState<HomeFeedState>({
     data: null,
     error: null,
+    hasMore: true,
     isLoading: true,
+    isLoadingMore: false,
     isRefreshing: false,
+    nextPage: 1,
   });
 
-  const loadFeed = useCallback(async (mode: 'initial' | 'refresh' = 'initial') => {
+  const loadFeed = useCallback(async (loadMode: 'initial' | 'refresh' = 'initial') => {
     setState((current) => ({
       ...current,
       error: null,
-      isLoading: mode === 'initial',
-      isRefreshing: mode === 'refresh',
+      hasMore: loadMode === 'refresh' ? current.hasMore : true,
+      isLoading: loadMode === 'initial',
+      isLoadingMore: false,
+      isRefreshing: loadMode === 'refresh',
+      nextPage: loadMode === 'refresh' ? current.nextPage : 1,
     }));
 
     try {
-      const data = await apiService.getHomeFeed();
-      setState({ data, error: null, isLoading: false, isRefreshing: false });
+      const data = await apiService.getHomeFeed(mode);
+      setState({
+        data,
+        error: null,
+        hasMore: true,
+        isLoading: false,
+        isLoadingMore: false,
+        isRefreshing: false,
+        nextPage: 1,
+      });
     } catch (error) {
       setState((current) => ({
-        data: mode === 'refresh' ? current.data : null,
+        data: loadMode === 'refresh' ? current.data : null,
         error: error instanceof Error ? error.message : APP_STRINGS.errors.unableToLoadEdStream,
+        hasMore: loadMode === 'refresh' ? current.hasMore : true,
         isLoading: false,
+        isLoadingMore: false,
         isRefreshing: false,
+        nextPage: loadMode === 'refresh' ? current.nextPage : 1,
       }));
     }
-  }, []);
+  }, [mode]);
+
+  const loadMore = useCallback(async () => {
+    if (!state.data || state.isLoading || state.isRefreshing || state.isLoadingMore || !state.hasMore) {
+      return;
+    }
+
+    setState((current) => ({
+      ...current,
+      error: null,
+      isLoadingMore: true,
+    }));
+
+    try {
+      const response = await apiService.getHomeRailPage({
+        mode,
+        page: state.nextPage,
+        pageSize: HOME_RAIL_PAGE_SIZE,
+      });
+
+      setState((current) => {
+        if (!current.data || response.activeMode !== current.data.activeMode) {
+          return {
+            ...current,
+            isLoadingMore: false,
+          };
+        }
+
+        return {
+          ...current,
+          data: {
+            ...current.data,
+            rails: [...current.data.rails, ...response.rails],
+          },
+          hasMore: response.hasMore,
+          isLoadingMore: false,
+          nextPage: response.page + 1,
+        };
+      });
+    } catch (error) {
+      setState((current) => ({
+        ...current,
+        error: error instanceof Error ? error.message : APP_STRINGS.errors.unableToLoadEdStream,
+        isLoadingMore: false,
+      }));
+    }
+  }, [mode, state.data, state.hasMore, state.isLoading, state.isLoadingMore, state.isRefreshing, state.nextPage]);
 
   useEffect(() => {
     let isMounted = true;
 
+    setState((current) => ({
+      ...current,
+      error: null,
+      hasMore: true,
+      isLoading: true,
+      isLoadingMore: false,
+      isRefreshing: false,
+      nextPage: 1,
+    }));
+
     const timeoutId = setTimeout(() => {
       apiService
-        .getHomeFeed()
+        .getHomeFeed(mode)
         .then((data) => {
           if (isMounted) {
-            setState({ data, error: null, isLoading: false, isRefreshing: false });
+            setState({
+              data,
+              error: null,
+              hasMore: true,
+              isLoading: false,
+              isLoadingMore: false,
+              isRefreshing: false,
+              nextPage: 1,
+            });
           }
         })
         .catch((error: unknown) => {
@@ -56,8 +142,11 @@ export function useHomeFeed() {
             setState({
               data: null,
               error: error instanceof Error ? error.message : APP_STRINGS.errors.unableToLoadEdStream,
+              hasMore: true,
               isLoading: false,
+              isLoadingMore: false,
               isRefreshing: false,
+              nextPage: 1,
             });
           }
         });
@@ -67,10 +156,11 @@ export function useHomeFeed() {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, []);
+  }, [mode]);
 
   return {
     ...state,
+    loadMore,
     refresh: () => loadFeed('refresh'),
     retry: () => loadFeed('initial'),
   };

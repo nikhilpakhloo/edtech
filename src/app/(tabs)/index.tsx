@@ -1,11 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, type Href } from "expo-router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useRef, useState, type ComponentProps } from "react";
 import type { ListRenderItem } from "react-native";
 import {
-  Dimensions,
+  ActivityIndicator,
   FlatList,
   Pressable,
   RefreshControl,
@@ -23,29 +22,29 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { HomeSkeleton } from "@/components/feedback/Skeleton";
 import { Screen } from "@/components/layout/Screen";
 import { MediaRail } from "@/components/media/MediaRail";
+import { OptimizedImage } from "@/components/media/OptimizedImage";
 import { APP_STRINGS } from "@/constants/string";
 import { useHomeFeed } from "@/features/home/hooks/useHomeFeed";
 import { useAppTheme } from "@/theme/AppTheme";
-import type { MediaItem, MediaRail as MediaRailType } from "@/types/media";
+import type {
+  HomeModeId,
+  HomeModeOption,
+  MediaItem,
+  MediaRail as MediaRailType,
+} from "@/types/media";
 import { impactHaptic, selectionHaptic } from "@/utils/haptics";
 import { HOME_FEED_LIST_PROPS } from "@/utils/listPerf";
+import { useResponsiveMetrics } from "@/utils/responsive";
 import { getTabBarContentPadding } from "@/utils/tabBar";
 
-type HomeMode = "learn" | "practice";
+const CAROUSEL_MODE_CONFIG = {
+  snapDirection: "left",
+  stackInterval: 28,
+  scaleInterval: 0.06,
+  opacityInterval: 0.12,
+} as const;
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const FOR_YOU_CARD_WIDTH = Math.min(SCREEN_WIDTH * 0.76, 330);
-const FOR_YOU_CARD_HEIGHT = 360;
-const FOR_YOU_CAROUSEL_HEIGHT = FOR_YOU_CARD_HEIGHT + 28;
-
-const MODE_OPTIONS: {
-  id: HomeMode;
-  label: string;
-  eyebrow: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  activeColors: [string, string, string];
-  idleColors: [string, string, string];
-}[] = [
+const HOME_MODE_OPTIONS: HomeModeOption[] = [
   {
     id: "learn",
     label: APP_STRINGS.home.modes.learn.label,
@@ -67,9 +66,11 @@ const MODE_OPTIONS: {
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useAppTheme();
-  const [activeMode, setActiveMode] = useState<HomeMode>("learn");
-  const { data, error, isLoading, isRefreshing, refresh, retry } =
-    useHomeFeed();
+  const metrics = useResponsiveMetrics();
+  const [activeMode, setActiveMode] = useState<HomeModeId>("learn");
+  const { data, error, hasMore, isLoading, isLoadingMore, isRefreshing, loadMore, refresh, retry } =
+    useHomeFeed(activeMode);
+  const modeOptions = data?.modes ?? HOME_MODE_OPTIONS;
 
   const handleSelectMedia = useCallback((item: MediaItem) => {
     router.push({
@@ -82,124 +83,40 @@ export default function HomeScreen() {
     ({ item }) => <MediaRail rail={item} onSelectMedia={handleSelectMedia} />,
     [handleSelectMedia],
   );
-
-  const modeFeed = useMemo(() => {
-    if (!data) {
+  const renderFooter = useCallback(() => {
+    if (!isLoadingMore && !hasMore) {
       return null;
     }
 
-    const byId = data.rails
-      .flatMap((rail) => rail.items)
-      .reduce<Record<string, MediaItem>>(
-        (acc, item) => {
-          acc[item.id] = item;
-          return acc;
-        },
-        { [data.hero.id]: data.hero },
-      );
-
-    if (activeMode === "practice") {
-      return {
-        hero: byId["math-premier-league"] ?? data.hero,
-        carousel: [
-          byId["math-premier-league"],
-          byId["exam-mode"],
-          byId["startup-casefiles"],
-          byId["code-with-creators"],
-        ].filter(Boolean) as MediaItem[],
-        rails: [
-          {
-            id: "live-and-practice",
-            title: APP_STRINGS.home.rails.livePracticeArenas.title,
-            subtitle: APP_STRINGS.home.rails.livePracticeArenas.subtitle,
-            items: [
-              byId["math-premier-league"],
-              byId["exam-mode"],
-              byId["startup-casefiles"],
-            ].filter(Boolean) as MediaItem[],
-          },
-          {
-            id: "skill-sprints",
-            title: APP_STRINGS.home.rails.skillSprints.title,
-            subtitle: APP_STRINGS.home.rails.skillSprints.subtitle,
-            items: [
-              byId["exam-mode"],
-              byId["math-premier-league"],
-              byId["code-with-creators"],
-            ].filter(Boolean) as MediaItem[],
-          },
-          {
-            id: "practice-recommended",
-            title: APP_STRINGS.home.rails.practiceRecommended.title,
-            subtitle: APP_STRINGS.home.rails.practiceRecommended.subtitle,
-            items: [
-              byId["startup-casefiles"],
-              byId["react-native-shiproom"],
-              byId["exam-mode"],
-            ].filter(Boolean) as MediaItem[],
-          },
-        ],
-      };
-    }
-
-    return {
-      hero: data.hero,
-      carousel: [
-        data.hero,
-        byId["design-systems-lab"],
-        byId["react-native-shiproom"],
-        byId["history-in-motion"],
-      ].filter(Boolean) as MediaItem[],
-      rails: [
-        {
-          id: "continue-learning-learn",
-          title: APP_STRINGS.home.rails.continueLearning.title,
-          subtitle: APP_STRINGS.home.rails.continueLearning.subtitle,
-          items: [
-            data.hero,
-            byId["react-native-shiproom"],
-            byId["design-systems-lab"],
-          ].filter(Boolean) as MediaItem[],
-        },
-        {
-          id: "deep-learning-tracks",
-          title: APP_STRINGS.home.rails.deepLearningTracks.title,
-          subtitle: APP_STRINGS.home.rails.deepLearningTracks.subtitle,
-          items: [
-            byId["design-systems-lab"],
-            byId["react-native-shiproom"],
-            byId["code-with-creators"],
-          ].filter(Boolean) as MediaItem[],
-        },
-        {
-          id: "documentary-picks-learn",
-          title: APP_STRINGS.home.rails.documentaryPicks.title,
-          subtitle: APP_STRINGS.home.rails.documentaryPicks.subtitle,
-          items: [
-            byId["history-in-motion"],
-            data.hero,
-            byId["startup-casefiles"],
-          ].filter(Boolean) as MediaItem[],
-        },
-      ],
-    };
-  }, [activeMode, data]);
+    return (
+      <View style={styles.feedFooter}>
+        {isLoadingMore ? <ActivityIndicator color="#4F8CFF" /> : null}
+      </View>
+    );
+  }, [hasMore, isLoadingMore]);
 
   if (isLoading || isRefreshing) {
     return (
       <Screen edges={["left", "right"]}>
         <View
-          className="px-5 pt-14"
-          style={{ backgroundColor: colors.background }}
+          style={{
+            backgroundColor: colors.background,
+            paddingHorizontal: metrics.horizontalPadding,
+            paddingTop: metrics.headerTopPadding,
+          }}
         >
-          <ModeButtons activeMode={activeMode} onSelectMode={setActiveMode} />
+          <MemoizedModeButtons
+            activeMode={activeMode}
+            modes={modeOptions}
+            onSelectMode={setActiveMode}
+          />
         </View>
         <HomeSkeleton />
       </Screen>
     );
   }
 
-  if (error || !data || !modeFeed) {
+  if (error || !data) {
     return (
       <Screen edges={["top", "left", "right"]}>
         <ErrorState
@@ -214,25 +131,35 @@ export default function HomeScreen() {
   return (
     <Screen edges={["left", "right"]}>
       <View
-        className="px-5 pt-14"
-        style={{ backgroundColor: colors.background }}
+        style={{
+          backgroundColor: colors.background,
+          paddingHorizontal: metrics.horizontalPadding,
+          paddingTop: metrics.headerTopPadding,
+        }}
       >
-        <ModeButtons activeMode={activeMode} onSelectMode={setActiveMode} />
+        <MemoizedModeButtons
+          activeMode={data.activeMode}
+          modes={modeOptions}
+          onSelectMode={setActiveMode}
+        />
       </View>
       <FlatList
         {...HOME_FEED_LIST_PROPS}
         style={{ backgroundColor: colors.background }}
-        data={modeFeed.rails}
+        data={data.rails}
         keyExtractor={(rail) => rail.id}
         renderItem={renderRail}
         ListHeaderComponent={
-          <HomeTopExperience
+          <MemoizedHomeTopExperience
             activeMode={activeMode}
-            carouselItems={modeFeed.carousel}
-            hero={modeFeed.hero}
+            carouselItems={data.carousel}
+            hero={data.hero}
             onSelectMedia={handleSelectMedia}
           />
         }
+        ListFooterComponent={renderFooter}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.45}
         contentContainerStyle={{
           paddingBottom: getTabBarContentPadding(insets.bottom),
         }}
@@ -251,7 +178,7 @@ export default function HomeScreen() {
 }
 
 type HomeTopExperienceProps = {
-  activeMode: HomeMode;
+  activeMode: HomeModeId;
   hero: MediaItem;
   carouselItems: MediaItem[];
   onSelectMedia: (item: MediaItem) => void;
@@ -265,6 +192,15 @@ function HomeTopExperience({
 }: HomeTopExperienceProps) {
   const carouselRef = useRef<ICarouselInstance>(null);
   const { colors, isDark } = useAppTheme();
+  const metrics = useResponsiveMetrics();
+  const carouselHeight = metrics.carouselCardHeight + 28;
+  const customCarouselConfig = useCallback(
+    () => ({ type: "positive" as const, viewCount: 5 }),
+    [],
+  );
+  const configurePanGesture = useCallback((gesture: Parameters<NonNullable<ComponentProps<typeof Carousel>["onConfigurePanGesture"]>>[0]) => {
+    gesture.activeOffsetX([-12, 12]).failOffsetY([-8, 8]);
+  }, []);
 
   const renderCarouselItem = useCallback<CarouselRenderItem<MediaItem>>(
     ({ item, index }) => (
@@ -272,7 +208,10 @@ function HomeTopExperience({
         accessibilityRole="button"
         accessibilityLabel={APP_STRINGS.accessibility.openTitle(item.title)}
         className="mr-4"
-        style={styles.snapCardWrap}
+        style={{
+          height: metrics.carouselCardHeight,
+          width: metrics.carouselCardWidth,
+        }}
         onPress={() => {
           impactHaptic();
           onSelectMedia(item);
@@ -285,12 +224,17 @@ function HomeTopExperience({
             borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
           }}
         >
-          <Image
-            source={{ uri: item.backdropUrl }}
-            cachePolicy="disk"
+          <OptimizedImage
             contentFit="cover"
+            priority="normal"
+            recyclingKey={`carousel-${item.id}`}
+            sourceUri={item.backdropUrl}
             transition={180}
-            style={styles.snapImage}
+            style={{
+              height: metrics.carouselCardHeight,
+              width: metrics.carouselCardWidth,
+            }}
+            targetWidth={metrics.carouselCardWidth}
           />
           <View className="absolute inset-0 bg-black/25" />
           <View className="absolute bottom-0 left-0 right-0 bg-brand-ink/80 px-4 py-3">
@@ -307,12 +251,19 @@ function HomeTopExperience({
         </View>
       </Pressable>
     ),
-    [colors.border, colors.surface, isDark, onSelectMedia],
+    [
+      colors.border,
+      colors.surface,
+      isDark,
+      metrics.carouselCardHeight,
+      metrics.carouselCardWidth,
+      onSelectMedia,
+    ],
   );
 
   return (
     <View className="pb-2">
-      <View className="px-5">
+      <View style={{ paddingHorizontal: metrics.horizontalPadding }}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={APP_STRINGS.accessibility.openTitle(hero.title)}
@@ -326,15 +277,23 @@ function HomeTopExperience({
             onSelectMedia(hero);
           }}
         >
-          <Image
-            source={{ uri: hero.backdropUrl }}
-            cachePolicy="disk"
+          <OptimizedImage
             contentFit="cover"
+            priority="high"
+            recyclingKey={`home-hero-${hero.id}`}
+            sourceUri={hero.backdropUrl}
             transition={200}
-            style={styles.bannerImage}
+            style={{ height: metrics.heroImageHeight, width: "100%" }}
+            targetWidth={metrics.contentWidth}
           />
           <View className="absolute inset-0 bg-black/25" />
-          <View className="absolute bottom-0 left-0 right-0 bg-brand-ink/85 px-4 py-4">
+          <View
+            className="absolute bottom-0 left-0 right-0 bg-brand-ink/85"
+            style={{
+              paddingHorizontal: metrics.isCompact ? 12 : 16,
+              paddingVertical: metrics.isCompact ? 12 : 16,
+            }}
+          >
             <Text className="text-[11px] font-black uppercase tracking-[1.8px] text-brand-gold">
               {activeMode === "learn"
                 ? APP_STRINGS.home.modes.learn.featured
@@ -342,13 +301,15 @@ function HomeTopExperience({
             </Text>
             <Text
               numberOfLines={2}
-              className="mt-1 text-2xl font-black text-white"
+              className="mt-1 font-black text-white"
+              style={{ fontSize: metrics.isCompact ? 20 : 24, lineHeight: metrics.isCompact ? 25 : 30 }}
             >
               {hero.title}
             </Text>
             <Text
               numberOfLines={2}
-              className="mt-2 text-sm leading-5 text-slate-300"
+              className="mt-2 text-sm text-slate-300"
+              style={{ lineHeight: 20 }}
             >
               {hero.description}
             </Text>
@@ -356,8 +317,8 @@ function HomeTopExperience({
         </Pressable>
       </View>
 
-      <View className="mt-6">
-        <View className="mb-3 px-5">
+      <View style={{ marginTop: metrics.sectionGap }}>
+        <View style={{ marginBottom: 12, paddingHorizontal: metrics.horizontalPadding }}>
           <Text className="text-xl font-black" style={{ color: colors.text }}>
             {APP_STRINGS.home.forYou}
           </Text>
@@ -369,7 +330,7 @@ function HomeTopExperience({
             )}
           </Text>
         </View>
-        <View style={styles.snapCarouselFrame}>
+        <View style={[styles.snapCarouselFrame, { height: carouselHeight }]}>
           <Carousel
             ref={carouselRef}
             data={carouselItems}
@@ -380,19 +341,12 @@ function HomeTopExperience({
             autoPlayInterval={2200}
             renderItem={renderCarouselItem}
             mode="horizontal-stack"
-            modeConfig={{
-              snapDirection: "left",
-              stackInterval: 28,
-              scaleInterval: 0.06,
-              opacityInterval: 0.12,
-            }}
-            customConfig={() => ({ type: "positive", viewCount: 5 })}
-            onConfigurePanGesture={(gesture) => {
-              gesture.activeOffsetX([-12, 12]).failOffsetY([-8, 8]);
-            }}
+            modeConfig={CAROUSEL_MODE_CONFIG}
+            customConfig={customCarouselConfig}
+            onConfigurePanGesture={configurePanGesture}
             style={styles.snapCarousel}
-            width={FOR_YOU_CARD_WIDTH}
-            height={FOR_YOU_CAROUSEL_HEIGHT}
+            width={metrics.carouselCardWidth}
+            height={carouselHeight}
             windowSize={5}
           />
         </View>
@@ -401,15 +355,18 @@ function HomeTopExperience({
   );
 }
 
+const MemoizedHomeTopExperience = memo(HomeTopExperience);
+
 type ModeButtonsProps = {
-  activeMode: HomeMode;
-  onSelectMode: (mode: HomeMode) => void;
+  activeMode: HomeModeId;
+  modes: HomeModeOption[];
+  onSelectMode: (mode: HomeModeId) => void;
 };
 
-function ModeButtons({ activeMode, onSelectMode }: ModeButtonsProps) {
+function ModeButtons({ activeMode, modes, onSelectMode }: ModeButtonsProps) {
   return (
     <View className="mb-5 flex-row gap-3">
-      {MODE_OPTIONS.map((option) => {
+      {modes.map((option) => {
         const isActive = option.id === activeMode;
 
         return (
@@ -442,7 +399,7 @@ function ModeButtons({ activeMode, onSelectMode }: ModeButtonsProps) {
                   }`}
                 >
                   <Ionicons
-                    name={option.icon}
+                    name={option.icon as keyof typeof Ionicons.glyphMap}
                     color={
                       isActive && option.id === "practice"
                         ? "#B45309"
@@ -477,10 +434,13 @@ function ModeButtons({ activeMode, onSelectMode }: ModeButtonsProps) {
   );
 }
 
+const MemoizedModeButtons = memo(ModeButtons);
+
 const styles = StyleSheet.create({
-  bannerImage: {
-    height: 260,
-    width: "100%",
+  feedFooter: {
+    alignItems: "center",
+    height: 72,
+    justifyContent: "center",
   },
   modeButtonActive: {
     shadowColor: "#1F80E0",
@@ -500,25 +460,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
-  snapCardWrap: {
-    height: FOR_YOU_CARD_HEIGHT,
-    width: FOR_YOU_CARD_WIDTH,
-  },
-  snapImage: {
-    height: FOR_YOU_CARD_HEIGHT,
-    width: FOR_YOU_CARD_WIDTH,
-  },
   snapCarousel: {
     alignItems: "center",
-    height: FOR_YOU_CAROUSEL_HEIGHT,
     justifyContent: "center",
     overflow: "visible",
-    width: FOR_YOU_CARD_WIDTH,
   },
   snapCarouselFrame: {
     alignItems: "center",
-    height: FOR_YOU_CAROUSEL_HEIGHT,
     overflow: "visible",
-    width: SCREEN_WIDTH,
+    width: "100%",
   },
 });

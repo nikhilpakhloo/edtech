@@ -1,9 +1,9 @@
-import { Image } from 'expo-image';
-import { memo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 
+import { OptimizedImage } from '@/components/media/OptimizedImage';
 import { APP_STRINGS } from '@/constants/string';
 import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem } from '@/types/media';
@@ -17,6 +17,14 @@ type MediaCardProps = {
 
 function MediaCardBase({ item, onPress }: MediaCardProps) {
   const { colors, isDark } = useAppTheme();
+  const metadata = useMemo(
+    () => `${item.languages[0]} - ${formatRuntime(item.runtimeMinutes, item.seasonCount)}`,
+    [item.languages, item.runtimeMinutes, item.seasonCount],
+  );
+  const handlePress = useCallback(() => {
+    impactHaptic();
+    onPress(item);
+  }, [item, onPress]);
 
   return (
     <Pressable
@@ -24,23 +32,21 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
       accessibilityLabel={APP_STRINGS.accessibility.openTitle(item.title)}
       className="mr-3 w-32"
       style={({ pressed }) => [pressed && styles.pressed]}
-      onPress={() => {
-        impactHaptic();
-        onPress(item);
-      }}>
+      onPress={handlePress}>
       <View
         className="overflow-hidden rounded-md border"
         style={{
           backgroundColor: colors.elevated,
           borderColor: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
         }}>
-        <Image
-          source={{ uri: item.posterUrl }}
-          cachePolicy="disk"
+        <OptimizedImage
           contentFit="cover"
+          priority="low"
           recyclingKey={item.id}
-          transition={180}
+          sourceUri={item.posterUrl}
           style={styles.poster}
+          targetWidth={128}
+          transition={180}
         />
         {item.isPremium ? (
           <View className="absolute left-2 top-2 flex-row items-center rounded bg-brand-gold px-2 py-1">
@@ -73,7 +79,7 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
         {item.title}
       </Text>
       <Text numberOfLines={1} className="mt-1 text-xs" style={{ color: colors.textMuted }}>
-        {item.languages[0]} - {formatRuntime(item.runtimeMinutes, item.seasonCount)}
+        {metadata}
       </Text>
     </Pressable>
   );
@@ -81,8 +87,7 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
 
 const styles = StyleSheet.create({
   pressed: {
-    opacity: 0.78,
-    transform: [{ scale: 0.98 }],
+    opacity: 0.82,
   },
   poster: {
     height: 188,

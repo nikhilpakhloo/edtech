@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { router, type Href } from 'expo-router';
 import { memo, useCallback } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
 
 import { MetadataPill } from '@/components/media/MetadataPill';
+import { OptimizedImage } from '@/components/media/OptimizedImage';
 import { APP_STRINGS } from '@/constants/string';
 import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem } from '@/types/media';
@@ -31,13 +31,14 @@ function HeroBannerBase({ item }: HeroBannerProps) {
       <View
         className="h-[560px] overflow-hidden"
         style={{ backgroundColor: colors.surface }}>
-        <Image
-          source={{ uri: item.backdropUrl }}
-          cachePolicy="disk"
+        <OptimizedImage
           contentFit="cover"
+          priority="high"
           recyclingKey={`hero-${item.id}`}
+          sourceUri={item.backdropUrl}
           transition={220}
           style={StyleSheet.absoluteFill}
+          targetWidth={720}
         />
         <View className="absolute inset-0 bg-black/10" />
         <View className="absolute left-0 top-0 h-56 w-28 bg-brand-ink/75" />

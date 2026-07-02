@@ -1,7 +1,8 @@
 import { memo } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { useAppTheme } from "@/theme/AppTheme";
+import { useResponsiveMetrics } from "@/utils/responsive";
 
 function SkeletonBlock({ className }: { className: string }) {
   const { colors } = useAppTheme();
@@ -10,16 +11,18 @@ function SkeletonBlock({ className }: { className: string }) {
 }
 
 function SkeletonRail() {
+  const metrics = useResponsiveMetrics();
+
   return (
-    <View className="mb-7">
-      <View className="mb-3 px-5">
+    <View style={{ marginBottom: metrics.isCompact ? 24 : 28 }}>
+      <View style={{ marginBottom: 12, paddingHorizontal: metrics.horizontalPadding }}>
         <SkeletonBlock className="h-5 w-44 rounded" />
         <SkeletonBlock className="mt-2 h-3 w-56 rounded" />
       </View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.rail}
+        contentContainerStyle={{ paddingHorizontal: metrics.horizontalPadding }}
       >
         {Array.from({ length: 5 }).map((_, index) => (
           <View key={index} className="mr-3 w-32">
@@ -35,6 +38,7 @@ function SkeletonRail() {
 
 function HomeSkeletonBase() {
   const { colors } = useAppTheme();
+  const metrics = useResponsiveMetrics();
 
   return (
     <ScrollView
@@ -43,7 +47,11 @@ function HomeSkeletonBase() {
       showsVerticalScrollIndicator={false}
     >
       <SkeletonBlock className="h-[40px] w-full" />
-      <View className="px-5 py-6">
+      <View
+        style={{
+          paddingHorizontal: metrics.horizontalPadding,
+          paddingVertical: metrics.isCompact ? 20 : 24,
+        }}>
         <SkeletonBlock className="h-4 w-28 rounded" />
         <SkeletonBlock className="mt-3 h-10 w-64 rounded" />
         <SkeletonBlock className="mt-4 h-4 w-full rounded" />
@@ -58,6 +66,7 @@ function HomeSkeletonBase() {
 
 function DetailSkeletonBase() {
   const { colors } = useAppTheme();
+  const metrics = useResponsiveMetrics();
 
   return (
     <ScrollView
@@ -66,7 +75,11 @@ function DetailSkeletonBase() {
       showsVerticalScrollIndicator={false}
     >
       <SkeletonBlock className="h-[430px] w-full" />
-      <View className="px-5 py-5">
+      <View
+        style={{
+          paddingHorizontal: metrics.horizontalPadding,
+          paddingVertical: metrics.isCompact ? 16 : 20,
+        }}>
         <SkeletonBlock className="h-10 w-44 rounded" />
         <SkeletonBlock className="mt-5 aspect-video w-full rounded-lg" />
         <SkeletonBlock className="mt-5 h-4 w-full rounded" />
@@ -80,6 +93,7 @@ function DetailSkeletonBase() {
 
 function SearchSkeletonBase() {
   const { colors } = useAppTheme();
+  const metrics = useResponsiveMetrics();
 
   return (
     <ScrollView
@@ -87,7 +101,12 @@ function SearchSkeletonBase() {
       style={{ backgroundColor: colors.background }}
       showsVerticalScrollIndicator={false}
     >
-      <View className="px-5 pb-5 pt-14">
+      <View
+        style={{
+          paddingBottom: metrics.isCompact ? 16 : 20,
+          paddingHorizontal: metrics.horizontalPadding,
+          paddingTop: metrics.headerTopPadding,
+        }}>
         <SkeletonBlock className="h-9 w-32 rounded" />
         <SkeletonBlock className="mt-3 h-4 w-72 rounded" />
         <SkeletonBlock className="mt-5 h-12 w-full rounded-lg" />
@@ -99,12 +118,6 @@ function SearchSkeletonBase() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  rail: {
-    paddingHorizontal: 20,
-  },
-});
 
 export const HomeSkeleton = memo(HomeSkeletonBase);
 export const DetailSkeleton = memo(DetailSkeletonBase);

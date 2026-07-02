@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEvent } from "expo";
-import { Image } from "expo-image";
 import { useIsFocused } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { memo, useCallback, useEffect, useState } from "react";
 import { AppState, Pressable, StyleSheet, View } from "react-native";
 
+import { OptimizedImage } from "@/components/media/OptimizedImage";
 import { APP_STRINGS } from "@/constants/string";
 import { useAppTheme } from "@/theme/AppTheme";
 import type { StreamType } from "@/types/media";
@@ -109,11 +109,13 @@ function LearningVideoPlayerBase({
         style={styles.video}
       />
       {posterUrl && !hasFirstFrame ? (
-        <Image
-          source={{ uri: posterUrl }}
-          cachePolicy="disk"
+        <OptimizedImage
           contentFit="cover"
+          priority="high"
+          recyclingKey={`video-poster-${posterUrl}`}
+          sourceUri={posterUrl}
           style={[StyleSheet.absoluteFill, styles.poster]}
+          targetWidth={720}
         />
       ) : null}
       <Pressable

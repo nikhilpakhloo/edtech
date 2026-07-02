@@ -1,8 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ListRenderItem } from 'react-native';
-import { FlatList, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/feedback/EmptyState';
@@ -12,26 +21,92 @@ import { MediaCard } from '@/components/media/MediaCard';
 import { APP_STRINGS } from '@/constants/string';
 import { apiService } from '@/data/apiService';
 import { useAppTheme } from '@/theme/AppTheme';
-import type { MediaItem } from '@/types/media';
+import type { MediaItem, MediaRail as MediaRailType } from '@/types/media';
 import { selectionHaptic } from '@/utils/haptics';
+import { SEARCH_RAIL_LIST_PROPS } from '@/utils/listPerf';
+import { useResponsiveMetrics } from '@/utils/responsive';
 import { getTabBarContentPadding } from '@/utils/tabBar';
+
+const SEARCH_RAIL_ITEM_WIDTH = 156;
+const SEARCH_PAGE_SIZE = 6;
+
+type SearchResultsState = {
+  items: MediaItem[];
+  query: string;
+  page: number;
+  hasMore: boolean;
+  isLoadingMore: boolean;
+};
 
 export default function SearchScreen() {
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useAppTheme();
+  const metrics = useResponsiveMetrics();
   const [query, setQuery] = useState('');
-  const [items, setItems] = useState<MediaItem[]>([]);
+  const [browseRails, setBrowseRails] = useState<MediaRailType[]>([]);
+  const [searchState, setSearchState] = useState<SearchResultsState>({
+    hasMore: false,
+    items: [],
+    isLoadingMore: false,
+    page: 0,
+    query: '',
+  });
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const normalizedQuery = useMemo(() => query.trim().toLowerCase(), [query]);
+  const displayQuery = useMemo(() => query.trim(), [query]);
+  const searchResults = searchState.query === normalizedQuery ? searchState.items : [];
+  const canLoadMore =
+    Boolean(normalizedQuery) &&
+    searchState.query === normalizedQuery &&
+    searchState.hasMore &&
+    !searchState.isLoadingMore;
+
+  const loadBrowseRails = useCallback(async () => {
+    const response = await apiService.getSearchBrowse();
+    setBrowseRails(response.rails);
+    setError(null);
+  }, []);
+
+  const loadSearchPage = useCallback(
+    async (searchQuery: string, page: number, mode: 'replace' | 'append') => {
+      if (!searchQuery) {
+        return;
+      }
+
+      if (mode === 'append') {
+        setSearchState((current) => ({ ...current, isLoadingMore: true }));
+      }
+
+      const response = await apiService.getMediaPage({
+        page,
+        pageSize: SEARCH_PAGE_SIZE,
+        query: searchQuery,
+      });
+
+      setSearchState((current) => ({
+        hasMore: response.hasMore,
+        items: mode === 'append' && current.query === searchQuery
+          ? [...current.items, ...response.items]
+          : response.items,
+        isLoadingMore: false,
+        page: response.page,
+        query: searchQuery,
+      }));
+      setError(null);
+    },
+    [],
+  );
 
   useEffect(() => {
     let isMounted = true;
 
     apiService
-      .getAllMedia()
+      .getSearchBrowse()
       .then((response) => {
         if (isMounted) {
-          setItems(response);
+          setBrowseRails(response.rails);
           setError(null);
         }
       })
@@ -51,74 +126,41 @@ export default function SearchScreen() {
     };
   }, []);
 
-  const filteredItems = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
+  useEffect(() => {
     if (!normalizedQuery) {
-      return items;
+      return;
     }
 
-    return items.filter((item) => {
-      const searchableText = [
-        item.title,
-        item.eyebrow,
-        item.description,
-        item.kind,
-        item.rating,
-        item.releaseYear.toString(),
-        ...item.genres,
-        ...item.languages,
-      ]
-        .join(' ')
-        .toLowerCase();
+    let isMounted = true;
 
-      return searchableText.includes(normalizedQuery);
-    });
-  }, [items, query]);
+    apiService
+      .getMediaPage({
+        page: 1,
+        pageSize: SEARCH_PAGE_SIZE,
+        query: normalizedQuery,
+      })
+      .then((response) => {
+        if (isMounted) {
+          setSearchState({
+            hasMore: response.hasMore,
+            items: response.items,
+            isLoadingMore: false,
+            page: response.page,
+            query: normalizedQuery,
+          });
+          setError(null);
+        }
+      })
+      .catch((loadError) => {
+        if (isMounted) {
+          setError(loadError instanceof Error ? loadError.message : APP_STRINGS.errors.unableToLoadSearch);
+        }
+      });
 
-  const categoryRails = useMemo(
-    () => [
-      {
-        id: 'trending',
-        title: APP_STRINGS.search.rails.trending.title,
-        subtitle: APP_STRINGS.search.rails.trending.subtitle,
-        items: items.filter((item) => item.isTrending),
-      },
-      {
-        id: 'science',
-        title: APP_STRINGS.search.rails.science.title,
-        subtitle: APP_STRINGS.search.rails.science.subtitle,
-        items: items.filter((item) =>
-          item.genres.some((genre) => ['Physics', 'Chemistry', 'Biology', 'Science'].includes(genre)),
-        ),
-      },
-      {
-        id: 'exam',
-        title: APP_STRINGS.search.rails.exam.title,
-        subtitle: APP_STRINGS.search.rails.exam.subtitle,
-        items: items.filter((item) =>
-          item.genres.some((genre) => ['Exams', 'NEET', 'JEE', 'Revision'].includes(genre)),
-        ),
-      },
-      {
-        id: 'career',
-        title: APP_STRINGS.search.rails.career.title,
-        subtitle: APP_STRINGS.search.rails.career.subtitle,
-        items: items.filter((item) =>
-          item.genres.some((genre) =>
-            ['Data Science', 'Finance', 'Communication', 'Soft Skills', 'Business'].includes(genre),
-          ),
-        ),
-      },
-      {
-        id: 'all',
-        title: APP_STRINGS.search.rails.all.title,
-        subtitle: APP_STRINGS.search.rails.all.subtitle,
-        items,
-      },
-    ],
-    [items],
-  );
+    return () => {
+      isMounted = false;
+    };
+  }, [normalizedQuery]);
 
   const handleSelectMedia = useCallback((item: MediaItem) => {
     router.push({
@@ -135,6 +177,30 @@ export default function SearchScreen() {
     ),
     [handleSelectMedia],
   );
+  const handleRefresh = useCallback(() => {
+    setIsRefreshing(true);
+
+    Promise.all([
+      loadBrowseRails(),
+      normalizedQuery ? loadSearchPage(normalizedQuery, 1, 'replace') : Promise.resolve(),
+    ])
+      .catch((loadError) => {
+        setError(loadError instanceof Error ? loadError.message : APP_STRINGS.errors.unableToLoadSearch);
+      })
+      .finally(() => {
+        setIsRefreshing(false);
+      });
+  }, [loadBrowseRails, loadSearchPage, normalizedQuery]);
+  const handleLoadMore = useCallback(() => {
+    if (!canLoadMore) {
+      return;
+    }
+
+    loadSearchPage(normalizedQuery, searchState.page + 1, 'append').catch((loadError) => {
+      setSearchState((current) => ({ ...current, isLoadingMore: false }));
+      setError(loadError instanceof Error ? loadError.message : APP_STRINGS.errors.unableToLoadSearch);
+    });
+  }, [canLoadMore, loadSearchPage, normalizedQuery, searchState.page]);
 
   if (isLoading) {
     return <SearchSkeleton />;
@@ -142,8 +208,18 @@ export default function SearchScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 px-5 pt-16" style={{ backgroundColor: colors.background }}>
-        <ErrorState title={APP_STRINGS.errors.searchUnavailable} message={error} onRetry={() => setError(null)} />
+      <View
+        className="flex-1"
+        style={{
+          backgroundColor: colors.background,
+          paddingHorizontal: metrics.horizontalPadding,
+          paddingTop: metrics.headerTopPadding,
+        }}>
+        <ErrorState
+          title={APP_STRINGS.errors.searchUnavailable}
+          message={error}
+          onRetry={() => setError(null)}
+        />
       </View>
     );
   }
@@ -151,10 +227,13 @@ export default function SearchScreen() {
   return (
     <View className="flex-1" style={{ backgroundColor: colors.background }}>
       <View
-        className="border-b px-5 pb-5 pt-14"
+        className="border-b"
         style={{
           backgroundColor: colors.background,
           borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.1)',
+          paddingBottom: metrics.isCompact ? 16 : 20,
+          paddingHorizontal: metrics.horizontalPadding,
+          paddingTop: metrics.headerTopPadding,
         }}>
         <Text className="text-3xl font-black" style={{ color: colors.text }}>
           {APP_STRINGS.search.title}
@@ -164,10 +243,11 @@ export default function SearchScreen() {
         </Text>
 
         <View
-          className="mt-5 flex-row items-center rounded-lg border px-4"
+          className="flex-row items-center rounded-lg border px-4"
           style={{
             backgroundColor: colors.surface,
             borderColor: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
+            marginTop: metrics.isCompact ? 16 : 20,
           }}>
           <Ionicons name="search" color="#9AA7BC" size={20} />
           <TextInput
@@ -198,26 +278,44 @@ export default function SearchScreen() {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            tintColor="#FFFFFF"
+            progressBackgroundColor="#10141F"
+            colors={['#4F8CFF']}
+          />
+        }
         contentContainerStyle={{
           paddingBottom: getTabBarContentPadding(insets.bottom),
         }}>
-        {query.trim() ? (
-          filteredItems.length ? (
+        {displayQuery ? (
+          searchResults.length ? (
             <View className="pt-5">
-              <Text className="mb-4 px-5 text-sm font-bold" style={{ color: colors.textMuted }}>
-                {APP_STRINGS.search.resultLabel(query.trim())}
+              <Text
+                className="mb-4 text-sm font-bold"
+                style={{ color: colors.textMuted, paddingHorizontal: metrics.horizontalPadding }}>
+                {APP_STRINGS.search.resultLabel(displayQuery)}
               </Text>
-              <SearchRail
-                items={filteredItems}
+              <MemoizedSearchRail
+                items={searchResults}
                 renderItem={renderItem}
                 subtitle={APP_STRINGS.search.resultSubtitle}
                 title={APP_STRINGS.search.resultTitle}
+                hasMore={searchState.hasMore}
+                isLoadingMore={searchState.isLoadingMore}
+                onEndReached={handleLoadMore}
               />
             </View>
           ) : (
-            <View className="px-5 pt-10">
+            <View
+              style={{
+                paddingHorizontal: metrics.horizontalPadding,
+                paddingTop: metrics.isCompact ? 32 : 40,
+              }}>
               <Text className="mb-4 text-sm font-bold" style={{ color: colors.textMuted }}>
-                {APP_STRINGS.search.resultLabel(query.trim())}
+                {APP_STRINGS.search.resultLabel(displayQuery)}
               </Text>
               <EmptyState
                 title={APP_STRINGS.empty.noMatchesTitle}
@@ -226,9 +324,9 @@ export default function SearchScreen() {
             </View>
           )
         ) : (
-          categoryRails.map((rail) =>
+          browseRails.map((rail) =>
             rail.items.length ? (
-              <SearchRail
+              <MemoizedSearchRail
                 key={rail.id}
                 items={rail.items}
                 renderItem={renderItem}
@@ -245,32 +343,66 @@ export default function SearchScreen() {
 
 type SearchRailProps = {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   items: MediaItem[];
   renderItem: ListRenderItem<MediaItem>;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+  onEndReached?: () => void;
 };
 
-function SearchRail({ title, subtitle, items, renderItem }: SearchRailProps) {
+function SearchRail({
+  title,
+  subtitle,
+  items,
+  renderItem,
+  hasMore = false,
+  isLoadingMore = false,
+  onEndReached,
+}: SearchRailProps) {
   const { colors } = useAppTheme();
+  const metrics = useResponsiveMetrics();
+  const renderFooter = useCallback(() => {
+    if (!isLoadingMore && !hasMore) {
+      return null;
+    }
+
+    return (
+      <View className="h-full w-12 items-center justify-center">
+        {isLoadingMore ? <ActivityIndicator color="#4F8CFF" /> : null}
+      </View>
+    );
+  }, [hasMore, isLoadingMore]);
 
   return (
-    <View className="mb-8">
-      <View className="mb-3 px-5">
+    <View style={{ marginBottom: metrics.isCompact ? 24 : 32 }}>
+      <View style={{ marginBottom: 12, paddingHorizontal: metrics.horizontalPadding }}>
         <Text className="text-xl font-black" style={{ color: colors.text }}>
           {title}
         </Text>
-        <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
-          {subtitle}
-        </Text>
+        {subtitle ? (
+          <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
+            {subtitle}
+          </Text>
+        ) : null}
       </View>
       <FlatList
+        {...SEARCH_RAIL_LIST_PROPS}
         data={items}
-        horizontal
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20 }}
+        getItemLayout={(_, index) => ({
+          index,
+          length: SEARCH_RAIL_ITEM_WIDTH,
+          offset: SEARCH_RAIL_ITEM_WIDTH * index,
+        })}
+        contentContainerStyle={{ paddingHorizontal: metrics.horizontalPadding }}
+        ListFooterComponent={renderFooter}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.35}
       />
     </View>
   );
 }
+
+const MemoizedSearchRail = memo(SearchRail);

@@ -11,6 +11,7 @@ import { apiService } from '@/data/apiService';
 import { useAppTheme } from '@/theme/AppTheme';
 import type { ProfileResponse } from '@/types/media';
 import { selectionHaptic } from '@/utils/haptics';
+import { useResponsiveMetrics } from '@/utils/responsive';
 import { getTabBarContentPadding } from '@/utils/tabBar';
 
 const learnerStats = [
@@ -59,7 +60,10 @@ const settingIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useAppTheme();
+  const metrics = useResponsiveMetrics();
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
+  const quickActionWidth =
+    (metrics.contentWidth - metrics.horizontalPadding * 2 - 12) / 2;
 
   useEffect(() => {
     let isMounted = true;
@@ -93,14 +97,20 @@ export default function ProfileScreen() {
         contentContainerStyle={{
           backgroundColor: colors.background,
           paddingBottom: getTabBarContentPadding(insets.bottom),
-          paddingHorizontal: 20,
+          paddingHorizontal: metrics.horizontalPadding,
           paddingTop: 18,
         }}>
-        <View className="mb-5">
+        <View style={{ marginBottom: metrics.isCompact ? 18 : 20 }}>
           <Text className="text-[13px] font-black uppercase tracking-[2px] text-brand-cyan">
             {APP_STRINGS.profile.eyebrow}
           </Text>
-          <Text className="mt-1 text-3xl font-black" style={{ color: colors.text }}>
+          <Text
+            className="mt-1 font-black"
+            style={{
+              color: colors.text,
+              fontSize: metrics.isCompact ? 28 : 30,
+              lineHeight: metrics.isCompact ? 34 : 36,
+            }}>
             {APP_STRINGS.profile.title}
           </Text>
           <Text className="mt-2 text-sm leading-5" style={{ color: colors.textMuted }}>
@@ -155,15 +165,24 @@ export default function ProfileScreen() {
           </View>
         </LinearGradient>
 
-        <View className="mt-6 flex-row gap-3">
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: metrics.isCompact ? 'wrap' : 'nowrap',
+            gap: 12,
+            marginTop: metrics.sectionGap,
+          }}>
           {quickActions.map((action) => (
             <Pressable
               key={action.id}
               accessibilityRole="button"
               accessibilityLabel={action.label}
-              className="flex-1 overflow-hidden rounded-lg"
+              className="overflow-hidden rounded-lg"
+              style={metrics.isCompact ? { width: quickActionWidth } : { flex: 1 }}
               onPress={selectionHaptic}>
-              <LinearGradient colors={action.colors} style={styles.quickAction}>
+              <LinearGradient
+                colors={action.colors}
+                style={[styles.quickAction, { minHeight: metrics.quickActionMinHeight }]}>
                 <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
                   <Ionicons name={action.icon} color="#FFFFFF" size={22} />
                 </View>
@@ -178,7 +197,7 @@ export default function ProfileScreen() {
           ))}
         </View>
 
-        <View className="mt-7">
+        <View style={{ marginTop: metrics.isCompact ? 24 : 28 }}>
           <Text className="text-xl font-black" style={{ color: colors.text }}>
             {APP_STRINGS.profile.preferencesTitle}
           </Text>
@@ -218,7 +237,11 @@ export default function ProfileScreen() {
                     {setting.title}
                   </Text>
                   {typeof setting.enabled !== 'boolean' ? (
-                    <Text className="ml-2 text-sm font-black text-brand-cyan">{setting.value}</Text>
+                    <Text
+                      numberOfLines={1}
+                      className="ml-2 text-sm font-black text-brand-cyan">
+                      {setting.value}
+                    </Text>
                   ) : null}
                 </View>
                 <Text className="mt-1 text-sm leading-5" style={{ color: colors.textMuted }}>

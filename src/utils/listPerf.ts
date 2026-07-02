@@ -16,3 +16,13 @@ export const HOME_FEED_LIST_PROPS = {
   removeClippedSubviews: true,
   showsVerticalScrollIndicator: false,
 } as const;
+
+export const SEARCH_RAIL_LIST_PROPS = {
+  horizontal: true,
+  initialNumToRender: 5,
+  maxToRenderPerBatch: 6,
+  updateCellsBatchingPeriod: 40,
+  windowSize: 5,
+  removeClippedSubviews: true,
+  showsHorizontalScrollIndicator: false,
+} as const;
