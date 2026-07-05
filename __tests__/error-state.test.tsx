@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
-import { ErrorState } from "@/components/feedback/ErrorState";
+import { ErrorState } from "@/components/common/ErrorState";
 import { selectionHaptic } from "@/utils/haptics";
 
 jest.mock("@/theme/AppTheme", () => ({

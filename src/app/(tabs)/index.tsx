@@ -10,8 +10,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ErrorState } from "@/components/feedback/ErrorState";
-import { HomeSkeleton } from "@/components/feedback/Skeleton";
+import { ErrorState } from "@/components/common/ErrorState";
+import { HomeSkeleton } from "@/components/common/Skeleton";
 import { Screen } from "@/components/layout/Screen";
 import { HomeModeButtons } from "@/components/media/HomeModeButtons";
 import { HomeTopExperience } from "@/components/media/HomeTopExperience";

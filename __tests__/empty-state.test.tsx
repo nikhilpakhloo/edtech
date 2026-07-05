@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react-native";
 
-import { EmptyState } from "@/components/feedback/EmptyState";
+import { EmptyState } from "@/components/common/EmptyState";
 
 jest.mock("@/theme/AppTheme", () => ({
   useAppTheme: () => ({

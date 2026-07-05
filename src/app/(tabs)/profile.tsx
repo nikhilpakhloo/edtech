@@ -10,7 +10,7 @@ import {
 import { Avatar, Switch } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ProfileSkeleton } from "@/components/feedback/Skeleton";
+import { ProfileSkeleton } from "@/components/common/Skeleton";
 import { Screen } from "@/components/layout/Screen";
 import { APP_STRINGS } from "@/constants/string";
 import { apiService } from "@/data/apiService";

@@ -14,9 +14,9 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { EmptyState } from '@/components/feedback/EmptyState';
-import { ErrorState } from '@/components/feedback/ErrorState';
-import { SearchSkeleton } from '@/components/feedback/Skeleton';
+import { EmptyState } from '@/components/common/EmptyState';
+import { ErrorState } from '@/components/common/ErrorState';
+import { SearchSkeleton } from '@/components/common/Skeleton';
 import { MediaCard } from '@/components/media/MediaCard';
 import { APP_STRINGS } from '@/constants/string';
 import { apiService } from '@/data/apiService';

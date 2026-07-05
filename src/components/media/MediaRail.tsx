@@ -3,7 +3,7 @@ import { memo, useCallback } from 'react';
 import type { ListRenderItem } from 'react-native';
 import { FlatList, Pressable, Text, View } from 'react-native';
 
-import { EmptyState } from '@/components/feedback/EmptyState';
+import { EmptyState } from '@/components/common/EmptyState';
 import { MediaCard } from '@/components/media/MediaCard';
 import { APP_STRINGS } from '@/constants/string';
 import { useAppTheme } from '@/theme/AppTheme';

@@ -12,8 +12,8 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 
-import { ErrorState } from "@/components/feedback/ErrorState";
-import { DetailSkeleton } from "@/components/feedback/Skeleton";
+import { ErrorState } from "@/components/common/ErrorState";
+import { DetailSkeleton } from "@/components/common/Skeleton";
 import { Screen } from "@/components/layout/Screen";
 import { LearningVideoPlayer } from "@/components/media/LearningVideoPlayer";
 import { MediaRail } from "@/components/media/MediaRail";
