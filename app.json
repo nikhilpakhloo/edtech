@@ -8,7 +8,11 @@
     "scheme": "edstream",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/images/splash-icon.png"
+      "icon": "./assets/images/splash-icon.png",
+      "bundleIdentifier": "com.anonymous.EdStream",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "permissions": [
