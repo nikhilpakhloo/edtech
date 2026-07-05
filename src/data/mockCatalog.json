@@ -355,6 +355,42 @@
   ],
   "home": {
     "defaultMode": "learn",
+    "purpose": "A Hotstar-inspired feed that prioritizes the learner's next useful action before broad discovery.",
+    "nextBestAction": {
+      "title": "Resume Physics Studio",
+      "subtitle": "Next: Ray diagrams practice",
+      "lastPlayedLesson": "Last played: Light Reflection Basics",
+      "mediaId": "physics-studio",
+      "progressPercent": 0.58,
+      "timeRemainingMinutes": 18,
+      "ctaLabel": "Resume"
+    },
+    "studyPlan": [
+      {
+        "id": "today-video",
+        "label": "Watch",
+        "mediaId": "physics-studio",
+        "title": "Light Reflection Basics",
+        "durationMinutes": 12,
+        "status": "next"
+      },
+      {
+        "id": "today-practice",
+        "label": "Practice",
+        "mediaId": "chemistry-kitchen",
+        "title": "Ray Diagram Drill",
+        "durationMinutes": 10,
+        "status": "locked-after-video"
+      },
+      {
+        "id": "today-quiz",
+        "label": "Quiz",
+        "mediaId": "exam-mode",
+        "title": "5 Question Checkpoint",
+        "durationMinutes": 6,
+        "status": "locked-after-practice"
+      }
+    ],
     "modes": [
       {
         "id": "learn",
@@ -375,50 +411,84 @@
     ],
     "feeds": {
       "learn": {
-        "heroId": "future-of-ai",
-        "carouselIds": ["future-of-ai", "react-native-shiproom", "history-in-motion"],
+        "heroId": "physics-studio",
+        "carouselIds": ["physics-studio", "react-native-shiproom", "history-in-motion"],
         "rails": [
           {
             "id": "continue-learning-learn",
             "title": "Continue Learning",
-            "subtitle": "Resume courses and cinematic lessons",
-            "itemIds": ["future-of-ai", "react-native-shiproom", "design-systems-lab"]
+            "subtitle": "Progress-first row: resume, finish, or revise",
+            "reason": "Fixes passive Continue Watching by showing courses with active progress.",
+            "itemIds": ["physics-studio", "future-of-ai", "react-native-shiproom", "neet-biology-rapid", "jee-problem-solving"]
+          },
+          {
+            "id": "todays-study-plan",
+            "title": "Today's Study Plan",
+            "subtitle": "Short sessions ordered by what helps next",
+            "reason": "Reduces endless browsing by giving the learner a clear daily path.",
+            "itemIds": ["physics-studio", "chemistry-kitchen", "english-speaking-club", "exam-mode"]
+          },
+          {
+            "id": "because-you-practiced-algebra",
+            "title": "Because You Practiced Algebra",
+            "subtitle": "Recommended from recent weak-topic activity",
+            "reason": "Makes recommendations explainable instead of opaque.",
+            "itemIds": ["jee-problem-solving", "math-premier-league", "data-science-foundations", "exam-mode"]
           },
           {
             "id": "deep-learning-tracks",
             "title": "Deep Learning Tracks",
-            "subtitle": "Structured series for product, code, and design",
-            "itemIds": ["design-systems-lab", "react-native-shiproom", "code-with-creators"]
+            "subtitle": "Structured paths for product, code, and design",
+            "reason": "Turns content rows into purposeful learning paths.",
+            "itemIds": ["design-systems-lab", "react-native-shiproom", "code-with-creators", "data-science-foundations"]
+          },
+          {
+            "id": "quick-ten-minute-lessons",
+            "title": "Quick 10-Minute Lessons",
+            "subtitle": "Compact lessons for low-friction study",
+            "reason": "Gives busy learners a fast, clear commitment.",
+            "itemIds": ["chemistry-kitchen", "english-speaking-club", "public-speaking-stage", "financial-literacy-101"]
           },
           {
             "id": "documentary-picks-learn",
             "title": "Documentaries That Teach",
             "subtitle": "Story-led lessons for broader context",
-            "itemIds": ["history-in-motion", "future-of-ai", "startup-casefiles"]
+            "reason": "Keeps Hotstar-like discovery while staying educational.",
+            "itemIds": ["history-in-motion", "future-of-ai", "startup-casefiles", "financial-literacy-101"]
           }
         ]
       },
       "practice": {
         "heroId": "math-premier-league",
-        "carouselIds": ["math-premier-league", "startup-casefiles", "code-with-creators"],
+        "carouselIds": ["math-premier-league", "exam-mode", "jee-problem-solving", "neet-biology-rapid"],
         "rails": [
           {
             "id": "live-and-practice",
             "title": "Live Practice Arenas",
             "subtitle": "Challenges, revision, and competition-ready sessions",
-            "itemIds": ["math-premier-league", "exam-mode", "startup-casefiles"]
+            "reason": "Makes live content useful for practice instead of just event discovery.",
+            "itemIds": ["math-premier-league", "exam-mode", "jee-problem-solving", "neet-biology-rapid"]
+          },
+          {
+            "id": "practice-weak-topics",
+            "title": "Practice Weak Topics",
+            "subtitle": "Targeted revision based on recent mistakes",
+            "reason": "Adds a feedback loop that entertainment apps do not need.",
+            "itemIds": ["jee-problem-solving", "physics-studio", "chemistry-kitchen", "neet-biology-rapid"]
           },
           {
             "id": "skill-sprints",
             "title": "Exam and Skill Sprints",
             "subtitle": "Focused runs for tests, speed, and applied confidence",
-            "itemIds": ["exam-mode", "math-premier-league", "code-with-creators"]
+            "reason": "Makes a row useful by time and goal, not only popularity.",
+            "itemIds": ["exam-mode", "math-premier-league", "code-with-creators", "english-speaking-club"]
           },
           {
             "id": "practice-recommended",
             "title": "Recommended Practice",
             "subtitle": "Hands-on sessions picked for your next milestone",
-            "itemIds": ["startup-casefiles", "react-native-shiproom", "exam-mode"]
+            "reason": "Explains why the content appears in the feed.",
+            "itemIds": ["startup-casefiles", "react-native-shiproom", "exam-mode", "public-speaking-stage"]
           }
         ]
       }
@@ -458,10 +528,114 @@
       }
     ]
   },
+  "detailViews": {
+    "defaultActions": [
+      { "id": "primary", "label": "Resume", "icon": "play", "kind": "primary" },
+      { "id": "watchlist", "label": "Bookmark", "icon": "bookmark-outline", "kind": "secondary" },
+      { "id": "download", "label": "Download", "icon": "download-outline", "kind": "secondary" },
+      { "id": "share", "label": "Share", "icon": "share-social-outline", "kind": "secondary" }
+    ],
+    "byMediaId": {
+      "physics-studio": {
+        "headline": "Learn the concept, then prove it with practice.",
+        "primaryCtaLabel": "Resume Lesson",
+        "nextStep": "Complete Ray Diagrams Practice",
+        "metadata": [
+          { "label": "Subject", "value": "Physics" },
+          { "label": "Level", "value": "Class 10" },
+          { "label": "Lessons", "value": "14" },
+          { "label": "Quizzes", "value": "5" },
+          { "label": "Certificate", "value": "Available" },
+          { "label": "Progress", "value": "58%" }
+        ],
+        "sections": [
+          {
+            "id": "overview",
+            "title": "Overview",
+            "body": "Visual experiments explain motion, electricity, waves, and modern physics with classroom-friendly demonstrations."
+          },
+          {
+            "id": "outcomes",
+            "title": "What you will learn",
+            "bullets": [
+              "Understand ray diagrams with visual examples",
+              "Connect formulas to real classroom problems",
+              "Practice checkpoint questions after each concept"
+            ]
+          },
+          {
+            "id": "lesson-plan",
+            "title": "Lesson plan",
+            "bullets": [
+              "Concept video",
+              "Guided example",
+              "Practice drill",
+              "Quiz checkpoint",
+              "Revision summary"
+            ]
+          },
+          {
+            "id": "practice",
+            "title": "Practice checkpoints",
+            "bullets": [
+              "Ray diagram drill: 10 minutes",
+              "Mirror formula quiz: 5 questions",
+              "Weak-topic revision: Reflection vocabulary"
+            ]
+          }
+        ]
+      },
+      "jee-problem-solving": {
+        "headline": "Move from watching solutions to solving with strategy.",
+        "primaryCtaLabel": "Solve Now",
+        "nextStep": "Finish Calculus Speed Drill",
+        "metadata": [
+          { "label": "Exam", "value": "JEE" },
+          { "label": "Level", "value": "Advanced" },
+          { "label": "Episodes", "value": "26" },
+          { "label": "Practice Sets", "value": "12" },
+          { "label": "Progress", "value": "42%" }
+        ],
+        "sections": [
+          {
+            "id": "overview",
+            "title": "Overview",
+            "body": "Step-by-step problem breakdowns for calculus, mechanics, and physical chemistry with timed solution strategy."
+          },
+          {
+            "id": "outcomes",
+            "title": "What you will learn",
+            "bullets": [
+              "Choose the fastest approach for multi-step problems",
+              "Identify traps in competitive exam questions",
+              "Build timed solving confidence"
+            ]
+          }
+        ]
+      }
+    }
+  },
   "profile": {
     "displayName": "Nikhil",
     "planName": "EdStream Premium",
     "avatarInitials": "NK",
+    "dashboard": {
+      "headline": "Your learning hub",
+      "summary": "Track progress, downloads, certificates, and playback preferences without requiring login.",
+      "stats": [
+        { "id": "streak", "label": "Streak", "value": "8", "suffix": "days" },
+        { "id": "studyTime", "label": "Study Time", "value": "12.5", "suffix": "hours" },
+        { "id": "completed", "label": "Completed", "value": "6", "suffix": "courses" },
+        { "id": "progress", "label": "Weekly Goal", "value": "68", "suffix": "%" }
+      ],
+      "quickActions": [
+        { "id": "downloads", "label": "Downloads", "caption": "4 lessons ready offline", "icon": "download-outline" },
+        { "id": "bookmarks", "label": "Bookmarks", "caption": "9 saved lessons", "icon": "bookmark-outline" },
+        { "id": "certificates", "label": "Certificates", "caption": "2 achievements", "icon": "ribbon-outline" },
+        { "id": "revision", "label": "Revision", "caption": "3 weak topics", "icon": "refresh-outline" }
+      ],
+      "streakMessage": "Finish one lesson today to unlock your next weekly milestone."
+    },
     "settings": [
       {
         "id": "autoplay",
@@ -487,7 +661,78 @@
         "title": "Preferred languages",
         "description": "Used to personalize your rails",
         "value": "English, Hindi"
+      },
+      {
+        "id": "notifications",
+        "title": "Study reminders",
+        "description": "Get reminders for live classes and pending quizzes",
+        "value": "On",
+        "enabled": true
+      },
+      {
+        "id": "dataSaver",
+        "title": "Data saver",
+        "description": "Reduce image and video quality on mobile data",
+        "value": "Off",
+        "enabled": false
+      },
+      {
+        "id": "theme",
+        "title": "Appearance",
+        "description": "Use the cinematic dark learning theme",
+        "value": "Dark"
       }
     ]
+  },
+  "uiStates": {
+    "skeleton": {
+      "home": {
+        "heroLabel": "Loading featured lesson",
+        "railLabel": "Loading learning rows",
+        "cardCount": 6
+      },
+      "detail": {
+        "headerLabel": "Loading lesson details",
+        "sectionCount": 3
+      },
+      "profile": {
+        "label": "Loading learning dashboard"
+      }
+    },
+    "errors": {
+      "home": {
+        "title": "Feed unavailable",
+        "message": "We could not load the learning feed. Check the mock service and try again.",
+        "actionLabel": "Retry"
+      },
+      "detail": {
+        "title": "Title unavailable",
+        "message": "This lesson is missing or no longer available in the mock catalog.",
+        "actionLabel": "Retry"
+      },
+      "profile": {
+        "title": "Profile unavailable",
+        "message": "We could not load My Space right now.",
+        "actionLabel": "Retry"
+      }
+    },
+    "empty": {
+      "rail": {
+        "title": "Nothing here yet",
+        "message": "This row is ready, but the mock service did not return lessons for it."
+      },
+      "search": {
+        "title": "No matches",
+        "message": "Try searching another topic, subject, language, or exam track."
+      },
+      "downloads": {
+        "title": "No downloads yet",
+        "message": "Download lessons to study offline before travel or low-network sessions."
+      },
+      "bookmarks": {
+        "title": "No bookmarks yet",
+        "message": "Save lessons, quizzes, and revision videos to find them quickly later."
+      }
+    }
   }
 }

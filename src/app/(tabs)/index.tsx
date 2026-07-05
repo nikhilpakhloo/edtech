@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, type Href } from "expo-router";
-import { memo, useCallback, useRef, useState, type ComponentProps } from "react";
+import { router, type Href, useFocusEffect } from "expo-router";
+import { memo, useCallback, useMemo, useRef, useState, type ComponentProps } from "react";
 import type { ListRenderItem } from "react-native";
 import {
   ActivityIndicator,
@@ -12,6 +12,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { ProgressBar } from "react-native-paper";
 import Carousel, {
   type CarouselRenderItem,
   type ICarouselInstance,
@@ -24,6 +25,7 @@ import { Screen } from "@/components/layout/Screen";
 import { MediaRail } from "@/components/media/MediaRail";
 import { OptimizedImage } from "@/components/media/OptimizedImage";
 import { APP_STRINGS } from "@/constants/string";
+import { learningProgressStore } from "@/data/learningProgressStore";
 import { useHomeFeed } from "@/features/home/hooks/useHomeFeed";
 import { useAppTheme } from "@/theme/AppTheme";
 import type {
@@ -31,18 +33,13 @@ import type {
   HomeModeOption,
   MediaItem,
   MediaRail as MediaRailType,
+  NextBestAction,
+  StudyPlanItem,
 } from "@/types/media";
 import { impactHaptic, selectionHaptic } from "@/utils/haptics";
 import { HOME_FEED_LIST_PROPS } from "@/utils/listPerf";
 import { useResponsiveMetrics } from "@/utils/responsive";
 import { getTabBarContentPadding } from "@/utils/tabBar";
-
-const CAROUSEL_MODE_CONFIG = {
-  snapDirection: "left",
-  stackInterval: 28,
-  scaleInterval: 0.06,
-  opacityInterval: 0.12,
-} as const;
 
 const HOME_MODE_OPTIONS: HomeModeOption[] = [
   {
@@ -68,9 +65,21 @@ export default function HomeScreen() {
   const { colors } = useAppTheme();
   const metrics = useResponsiveMetrics();
   const [activeMode, setActiveMode] = useState<HomeModeId>("learn");
-  const { data, error, hasMore, isLoading, isLoadingMore, isRefreshing, loadMore, refresh, retry } =
+  const { data, error, hasMore, isLoading, isLoadingMore, isRefreshing, loadMore, refresh, retry, silentRefresh } =
     useHomeFeed(activeMode);
   const modeOptions = data?.modes ?? HOME_MODE_OPTIONS;
+  const hasFocusedOnce = useRef(false);
+  const homeMediaItems = useMemo(
+    () =>
+      data
+        ? [
+            data.hero,
+            ...data.carousel,
+            ...data.rails.flatMap((rail) => rail.items),
+          ]
+        : [],
+    [data],
+  );
 
   const handleSelectMedia = useCallback((item: MediaItem) => {
     router.push({
@@ -94,6 +103,17 @@ export default function HomeScreen() {
       </View>
     );
   }, [hasMore, isLoadingMore]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasFocusedOnce.current) {
+        hasFocusedOnce.current = true;
+        return;
+      }
+
+      silentRefresh();
+    }, [silentRefresh]),
+  );
 
   if (isLoading || isRefreshing) {
     return (
@@ -154,7 +174,10 @@ export default function HomeScreen() {
             activeMode={activeMode}
             carouselItems={data.carousel}
             hero={data.hero}
+            mediaItems={homeMediaItems}
+            nextBestAction={data.nextBestAction}
             onSelectMedia={handleSelectMedia}
+            studyPlan={data.studyPlan}
           />
         }
         ListFooterComponent={renderFooter}
@@ -181,22 +204,39 @@ type HomeTopExperienceProps = {
   activeMode: HomeModeId;
   hero: MediaItem;
   carouselItems: MediaItem[];
+  mediaItems: MediaItem[];
+  nextBestAction?: NextBestAction;
   onSelectMedia: (item: MediaItem) => void;
+  studyPlan?: StudyPlanItem[];
 };
 
 function HomeTopExperience({
   activeMode,
   hero,
   carouselItems,
+  mediaItems,
+  nextBestAction,
   onSelectMedia,
+  studyPlan,
 }: HomeTopExperienceProps) {
   const carouselRef = useRef<ICarouselInstance>(null);
   const { colors, isDark } = useAppTheme();
   const metrics = useResponsiveMetrics();
   const carouselHeight = metrics.carouselCardHeight + 28;
-  const customCarouselConfig = useCallback(
-    () => ({ type: "positive" as const, viewCount: 5 }),
-    [],
+  const nextBestActionItem = useMemo(
+    () =>
+      [hero, ...carouselItems].find(
+        (item) => item.id === nextBestAction?.mediaId,
+      ) ?? hero,
+    [carouselItems, hero, nextBestAction?.mediaId],
+  );
+  const mediaItemsById = useMemo(
+    () =>
+      mediaItems.reduce<Record<string, MediaItem>>((acc, item) => {
+        acc[item.id] = item;
+        return acc;
+      }, {}),
+    [mediaItems],
   );
   const configurePanGesture = useCallback((gesture: Parameters<NonNullable<ComponentProps<typeof Carousel>["onConfigurePanGesture"]>>[0]) => {
     gesture.activeOffsetX([-12, 12]).failOffsetY([-8, 8]);
@@ -204,52 +244,59 @@ function HomeTopExperience({
 
   const renderCarouselItem = useCallback<CarouselRenderItem<MediaItem>>(
     ({ item, index }) => (
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={APP_STRINGS.accessibility.openTitle(item.title)}
-        className="mr-4"
+      <View
         style={{
+          alignItems: "center",
           height: metrics.carouselCardHeight,
-          width: metrics.carouselCardWidth,
-        }}
-        onPress={() => {
-          impactHaptic();
-          onSelectMedia(item);
+          width: metrics.contentWidth,
         }}
       >
-        <View
-          className="overflow-hidden rounded-lg border"
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={APP_STRINGS.accessibility.openTitle(item.title)}
           style={{
-            backgroundColor: colors.surface,
-            borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
+            height: metrics.carouselCardHeight,
+            width: metrics.carouselCardWidth,
+          }}
+          onPress={() => {
+            impactHaptic();
+            onSelectMedia(item);
           }}
         >
-          <OptimizedImage
-            contentFit="cover"
-            priority="normal"
-            recyclingKey={`carousel-${item.id}`}
-            sourceUri={item.backdropUrl}
-            transition={180}
+          <View
+            className="overflow-hidden rounded-lg border"
             style={{
-              height: metrics.carouselCardHeight,
-              width: metrics.carouselCardWidth,
+              backgroundColor: colors.surface,
+              borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
             }}
-            targetWidth={metrics.carouselCardWidth}
-          />
-          <View className="absolute inset-0 bg-black/25" />
-          <View className="absolute bottom-0 left-0 right-0 bg-brand-ink/80 px-4 py-3">
-            <Text className="text-[11px] font-black uppercase tracking-[1.5px] text-brand-cyan">
-              {APP_STRINGS.home.forYouRank(index + 1)}
-            </Text>
-            <Text
-              numberOfLines={1}
-              className="mt-1 text-lg font-black text-white"
-            >
-              {item.title}
-            </Text>
+          >
+            <OptimizedImage
+              contentFit="cover"
+              priority="normal"
+              recyclingKey={`carousel-${item.id}`}
+              sourceUri={item.backdropUrl}
+              transition={180}
+              style={{
+                height: metrics.carouselCardHeight,
+                width: metrics.carouselCardWidth,
+              }}
+              targetWidth={metrics.carouselCardWidth}
+            />
+            <View className="absolute inset-0 bg-black/25" />
+            <View className="absolute bottom-0 left-0 right-0 bg-brand-ink/80 px-4 py-3">
+              <Text className="text-[11px] font-black uppercase tracking-[1.5px] text-brand-cyan">
+                {APP_STRINGS.home.forYouRank(index + 1)}
+              </Text>
+              <Text
+                numberOfLines={1}
+                className="mt-1 text-lg font-black text-white"
+              >
+                {item.title}
+              </Text>
+            </View>
           </View>
-        </View>
-      </Pressable>
+        </Pressable>
+      </View>
     ),
     [
       colors.border,
@@ -257,8 +304,24 @@ function HomeTopExperience({
       isDark,
       metrics.carouselCardHeight,
       metrics.carouselCardWidth,
+      metrics.contentWidth,
       onSelectMedia,
     ],
+  );
+
+  const handleSelectStudyPlanStep = useCallback(
+    (step: StudyPlanItem) => {
+      if (step.status !== "next" && step.status !== "done") {
+        return;
+      }
+
+      const item = mediaItemsById[step.mediaId] ?? nextBestActionItem;
+
+      impactHaptic();
+      learningProgressStore.completeStudyPlanItem(step.id);
+      onSelectMedia(item);
+    },
+    [mediaItemsById, nextBestActionItem, onSelectMedia],
   );
 
   return (
@@ -317,6 +380,128 @@ function HomeTopExperience({
         </Pressable>
       </View>
 
+      {nextBestAction ? (
+        <View
+          className="rounded-lg border"
+          style={{
+            backgroundColor: colors.elevated,
+            borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
+            marginHorizontal: metrics.horizontalPadding,
+            marginTop: metrics.sectionGap,
+            padding: metrics.isCompact ? 12 : 14,
+          }}
+        >
+          <View className="flex-row items-center">
+            <View className="h-11 w-11 items-center justify-center rounded-full bg-brand-blue/15">
+              <Ionicons name="navigate" color="#4F8CFF" size={21} />
+            </View>
+            <View className="ml-3 flex-1">
+              <Text className="text-base font-black" style={{ color: colors.text }}>
+                {nextBestAction.title}
+              </Text>
+              <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
+                {nextBestAction.subtitle}
+              </Text>
+              {nextBestAction.lastPlayedLesson ? (
+                <Text
+                  numberOfLines={1}
+                  className="mt-1 text-xs font-bold"
+                  style={{ color: colors.textMuted }}
+                >
+                  {nextBestAction.lastPlayedLesson}
+                </Text>
+              ) : null}
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={APP_STRINGS.accessibility.openTitle(nextBestAction.title)}
+              className="min-h-10 justify-center rounded-full bg-white px-4"
+              onPress={() => {
+                impactHaptic();
+                onSelectMedia(nextBestActionItem);
+              }}
+            >
+              <Text className="text-xs font-black uppercase text-brand-ink">
+                {nextBestAction.ctaLabel}
+              </Text>
+            </Pressable>
+          </View>
+          <View className="mt-4 flex-row items-center">
+            <ProgressBar
+              progress={nextBestAction.progressPercent}
+              color="#1F80E0"
+              style={styles.nextActionProgress}
+            />
+            <Text className="ml-3 text-xs font-black text-brand-cyan">
+              {APP_STRINGS.format.minutes(nextBestAction.timeRemainingMinutes)}
+            </Text>
+          </View>
+        </View>
+      ) : null}
+
+      {studyPlan?.length ? (
+        <View style={{ marginTop: metrics.sectionGap, paddingHorizontal: metrics.horizontalPadding }}>
+          <Text className="text-xl font-black" style={{ color: colors.text }}>
+            {APP_STRINGS.home.studyPlanTitle}
+          </Text>
+          <View className="mt-3 rounded-lg border" style={{
+            backgroundColor: colors.surface,
+            borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
+          }}>
+            {studyPlan.map((step, index) => (
+              <Pressable
+                key={step.id}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: step.status !== "next" && step.status !== "done" }}
+                accessibilityLabel={step.title}
+                className="flex-row items-center px-4 py-3"
+                style={{
+                  borderTopColor: isDark ? "rgba(255,255,255,0.08)" : colors.border,
+                  borderTopWidth: index ? StyleSheet.hairlineWidth : 0,
+                  opacity: step.status === "next" || step.status === "done" ? 1 : 0.55,
+                }}
+                onPress={() => handleSelectStudyPlanStep(step)}
+              >
+                <View
+                  className="h-9 w-9 items-center justify-center rounded-full"
+                  style={{
+                    backgroundColor:
+                      step.status === "done"
+                        ? "#22C55E"
+                        : step.status === "next"
+                          ? "#1F80E0"
+                          : "rgba(148,163,184,0.16)",
+                  }}
+                >
+                  <Ionicons
+                    name={
+                      step.status === "done"
+                        ? "checkmark"
+                        : step.status === "next"
+                          ? "play"
+                          : "lock-closed-outline"
+                    }
+                    color={step.status === "next" || step.status === "done" ? "#FFFFFF" : colors.textMuted}
+                    size={16}
+                  />
+                </View>
+                <View className="ml-3 flex-1">
+                  <Text className="text-[11px] font-black uppercase tracking-[1.2px] text-brand-gold">
+                    {step.label}
+                  </Text>
+                  <Text numberOfLines={1} className="mt-1 text-sm font-bold" style={{ color: colors.text }}>
+                    {step.title}
+                  </Text>
+                </View>
+                <Text className="text-xs font-black" style={{ color: colors.textMuted }}>
+                  {APP_STRINGS.format.minutes(step.durationMinutes)}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      ) : null}
+
       <View style={{ marginTop: metrics.sectionGap }}>
         <View style={{ marginBottom: 12, paddingHorizontal: metrics.horizontalPadding }}>
           <Text className="text-xl font-black" style={{ color: colors.text }}>
@@ -339,13 +524,11 @@ function HomeTopExperience({
             snapEnabled
             autoPlay={false}
             autoPlayInterval={2200}
+            scrollAnimationDuration={420}
             renderItem={renderCarouselItem}
-            mode="horizontal-stack"
-            modeConfig={CAROUSEL_MODE_CONFIG}
-            customConfig={customCarouselConfig}
             onConfigurePanGesture={configurePanGesture}
             style={styles.snapCarousel}
-            width={metrics.carouselCardWidth}
+            width={metrics.contentWidth}
             height={carouselHeight}
             windowSize={5}
           />
@@ -469,5 +652,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     overflow: "visible",
     width: "100%",
+  },
+  nextActionProgress: {
+    borderRadius: 999,
+    flex: 1,
+    height: 5,
   },
 });

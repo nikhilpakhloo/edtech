@@ -1,10 +1,12 @@
 import { router, Stack, useLocalSearchParams, type Href } from "expo-router";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import {
+  Pressable,
   StatusBar as NativeStatusBar,
   Text,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
@@ -17,12 +19,15 @@ import { LearningVideoPlayer } from "@/components/media/LearningVideoPlayer";
 import { MediaRail } from "@/components/media/MediaRail";
 import { MetadataPill } from "@/components/media/MetadataPill";
 import { APP_STRINGS } from "@/constants/string";
+import { learningProgressStore } from "@/data/learningProgressStore";
 import { DetailAnimatedHeader } from "@/features/detail/components/DetailAnimatedHeader";
 import { useMediaDetail } from "@/features/detail/hooks/useMediaDetail";
 import { useAppTheme } from "@/theme/AppTheme";
 import type {
   DetailContentSection,
+  DetailAction,
   DetailMetadataGroup,
+  DetailMetric,
   MediaItem,
 } from "@/types/media";
 import { selectionHaptic } from "@/utils/haptics";
@@ -60,6 +65,13 @@ export default function DetailScreen() {
       params: { mediaId: selectedItem.id },
     } as unknown as Href);
   }, []);
+
+  useEffect(() => {
+    if (item) {
+      learningProgressStore.recordLastPlayed(item);
+    }
+  }, [item]);
+
   if (isLoading) {
     return (
       <Screen edges={["left", "right"]}>
@@ -134,6 +146,8 @@ export default function DetailScreen() {
             ) : null}
           </View>
 
+          <ActionRow actions={detail.actions} onAction={handleHeaderAction} />
+          <MetricGrid metrics={detail.metrics} />
           <MetadataGroups groups={detail.metadataGroups} />
           <ContentSections sections={detail.sections} />
         </View>
@@ -150,6 +164,99 @@ export default function DetailScreen() {
         </View>
       </Animated.ScrollView>
     </Screen>
+  );
+}
+
+function ActionRow({
+  actions,
+  onAction,
+}: {
+  actions: DetailAction[];
+  onAction: () => void;
+}) {
+  const { colors, isDark } = useAppTheme();
+  const metrics = useResponsiveMetrics();
+
+  return (
+    <View
+      className="flex-row flex-wrap"
+      style={{ gap: 10, marginTop: metrics.isCompact ? 14 : 16 }}
+    >
+      {actions.map((action) => {
+        const isPrimary = action.kind === "primary";
+
+        return (
+          <Pressable
+            key={action.id}
+            accessibilityRole="button"
+            accessibilityLabel={action.label}
+            className="flex-row items-center justify-center rounded-full"
+            style={{
+              backgroundColor: isPrimary ? "#FFFFFF" : colors.surface,
+              borderColor: isDark ? "rgba(255,255,255,0.12)" : colors.border,
+              borderWidth: isPrimary ? 0 : 1,
+              minHeight: 42,
+              paddingHorizontal: isPrimary ? 18 : 14,
+            }}
+            onPress={onAction}
+          >
+            <Ionicons
+              name={action.icon as keyof typeof Ionicons.glyphMap}
+              color={isPrimary ? "#030712" : colors.text}
+              size={18}
+            />
+            <Text
+              className="ml-2 text-sm font-black"
+              style={{ color: isPrimary ? "#030712" : colors.text }}
+            >
+              {action.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+function MetricGrid({ metrics }: { metrics: DetailMetric[] }) {
+  const { colors, isDark } = useAppTheme();
+  const responsive = useResponsiveMetrics();
+
+  return (
+    <View
+      className="flex-row rounded-lg border"
+      style={{
+        backgroundColor: colors.surface,
+        borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
+        marginTop: responsive.isCompact ? 14 : 16,
+      }}
+    >
+      {metrics.map((metric, index) => (
+        <View
+          key={metric.id}
+          className="flex-1 px-3 py-3"
+          style={{
+            borderLeftColor: isDark ? "rgba(255,255,255,0.08)" : colors.border,
+            borderLeftWidth: index ? 1 : 0,
+          }}
+        >
+          <Text
+            numberOfLines={1}
+            className="text-[10px] font-black uppercase tracking-[1px]"
+            style={{ color: colors.textMuted }}
+          >
+            {metric.label}
+          </Text>
+          <Text
+            numberOfLines={1}
+            className="mt-1 text-sm font-black"
+            style={{ color: colors.text }}
+          >
+            {metric.value}
+          </Text>
+        </View>
+      ))}
+    </View>
   );
 }
 

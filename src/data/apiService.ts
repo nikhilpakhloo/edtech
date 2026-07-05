@@ -1,4 +1,5 @@
 import { APP_STRINGS } from '@/constants/string';
+import { learningProgressStore } from '@/data/learningProgressStore';
 import mockCatalog from '@/data/mockCatalog.json';
 import type {
   DetailAction,
@@ -12,8 +13,10 @@ import type {
   MediaDetailResponse,
   MediaItem,
   MediaRail,
+  NextBestAction,
   PaginatedMediaResponse,
   ProfileResponse,
+  StudyPlanItem,
   SearchBrowseResponse,
 } from '@/types/media';
 
@@ -36,10 +39,15 @@ type MockCatalog = {
   home: {
     defaultMode: HomeModeId;
     modes: HomeModeOption[];
+    nextBestAction?: NextBestAction;
     feeds: Record<HomeModeId, MockHomeFeed>;
+    studyPlan?: StudyPlanItem[];
   };
   search: {
     rails: MockSearchRail[];
+  };
+  detailViews?: {
+    byMediaId?: Record<string, MockDetailView>;
   };
   profile: ProfileResponse;
 };
@@ -54,6 +62,7 @@ type MockMediaRail = {
   id: string;
   title: string;
   subtitle?: string;
+  reason?: string;
   itemIds: string[];
 };
 
@@ -67,7 +76,19 @@ type MockSearchRail = {
   };
 };
 
-const catalog = mockCatalog as MockCatalog;
+type MockDetailMetadata = {
+  label: string;
+  value: string;
+};
+
+type MockDetailView = {
+  headline?: string;
+  nextStep?: string;
+  metadata?: MockDetailMetadata[];
+  sections?: DetailContentSection[];
+};
+
+const catalog = mockCatalog as unknown as MockCatalog;
 
 function delay<T>(payload: T, timeout = NETWORK_DELAY_MS): Promise<T> {
   return new Promise((resolve) => {
@@ -102,6 +123,7 @@ function resolveRail(rail: MockMediaRail): MediaRail {
   return {
     id: rail.id,
     items: resolveMediaList(rail.itemIds),
+    reason: rail.reason,
     subtitle: rail.subtitle,
     title: rail.title,
   };
@@ -214,12 +236,6 @@ function getRelatedItems(id: string) {
 function buildDetailActions(item: MediaItem): DetailAction[] {
   return [
     {
-      id: 'primary',
-      icon: 'play',
-      kind: 'primary',
-      label: item.primaryActionLabel,
-    },
-    {
       id: 'watchlist',
       icon: 'bookmark-outline',
       kind: 'secondary',
@@ -250,7 +266,19 @@ function buildDetailMetrics(item: MediaItem): DetailMetric[] {
 }
 
 function buildMetadataGroups(item: MediaItem): DetailMetadataGroup[] {
+  const customDetail = catalog.detailViews?.byMediaId?.[item.id];
+  const customMetadataGroup: DetailMetadataGroup[] = customDetail?.metadata?.length
+    ? [
+        {
+          id: 'learning-details',
+          title: 'Learning details',
+          values: customDetail.metadata.map((metadata) => `${metadata.label}: ${metadata.value}`),
+        },
+      ]
+    : [];
+
   return [
+    ...customMetadataGroup,
     {
       id: 'languages',
       title: APP_STRINGS.detail.metadata.languages,
@@ -279,7 +307,8 @@ function buildMetadataGroups(item: MediaItem): DetailMetadataGroup[] {
 }
 
 function buildDetailSections(item: MediaItem): DetailContentSection[] {
-  return [
+  const customDetail = catalog.detailViews?.byMediaId?.[item.id];
+  const generatedSections = [
     {
       id: 'overview',
       title: APP_STRINGS.detail.sections.overview,
@@ -301,18 +330,86 @@ function buildDetailSections(item: MediaItem): DetailContentSection[] {
         APP_STRINGS.detail.languageBullet(item.languages.join(' / ')),
       ],
     },
+    {
+      id: 'practice',
+      title: APP_STRINGS.detail.sections.practice,
+      bullets: [
+        APP_STRINGS.detail.practiceBullet,
+        APP_STRINGS.detail.revisionBullet,
+        APP_STRINGS.detail.bookmarkBullet,
+      ],
+    },
+  ];
+
+  if (!customDetail?.sections?.length) {
+    return generatedSections;
+  }
+
+  const customSectionIds = new Set(customDetail.sections.map((section) => section.id));
+
+  return [
+    ...customDetail.sections,
+    ...generatedSections.filter((section) => !customSectionIds.has(section.id)),
   ];
 }
 
 function buildMediaDetailResponse(item: MediaItem): MediaDetailResponse {
+  const customDetail = catalog.detailViews?.byMediaId?.[item.id];
+
   return {
     actions: buildDetailActions(item),
-    item,
+    item: customDetail?.headline
+      ? {
+          ...item,
+          description: customDetail.headline,
+        }
+      : item,
     metadataGroups: buildMetadataGroups(item),
     metrics: buildDetailMetrics(item),
     related: getRelatedItems(item.id),
     sections: buildDetailSections(item),
   };
+}
+
+function buildNextBestAction(): NextBestAction | undefined {
+  const lastPlayed = learningProgressStore.getLastPlayed();
+
+  if (!lastPlayed) {
+    return catalog.home.nextBestAction;
+  }
+
+  return {
+    ctaLabel: 'Resume',
+    lastPlayedLesson: `Last played: ${lastPlayed.title}`,
+    mediaId: lastPlayed.mediaId,
+    progressPercent: lastPlayed.progressPercent,
+    subtitle: lastPlayed.subtitle,
+    timeRemainingMinutes: lastPlayed.timeRemainingMinutes,
+    title: `Resume ${lastPlayed.title}`,
+  };
+}
+
+function buildStudyPlan(): StudyPlanItem[] | undefined {
+  if (!catalog.home.studyPlan?.length) {
+    return undefined;
+  }
+
+  const completedIds = learningProgressStore.getCompletedStudyPlanIds();
+  const firstIncompleteIndex = catalog.home.studyPlan.findIndex(
+    (step) => !completedIds.includes(step.id),
+  );
+
+  return catalog.home.studyPlan.map((step, index) => {
+    if (completedIds.includes(step.id)) {
+      return { ...step, status: 'done' };
+    }
+
+    if (index === firstIncompleteIndex || firstIncompleteIndex === -1) {
+      return { ...step, status: 'next' };
+    }
+
+    return step;
+  });
 }
 
 export const apiService = {
@@ -327,7 +424,9 @@ export const apiService = {
         carousel: resolveMediaList(feed.carouselIds),
         hero,
         modes: catalog.home.modes,
+        nextBestAction: buildNextBestAction(),
         rails: feed.rails.map(resolveRail),
+        studyPlan: buildStudyPlan(),
       }),
     );
   },

@@ -59,6 +59,11 @@ function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
               {rail.subtitle}
             </Text>
           ) : null}
+          {rail.reason ? (
+            <Text className="mt-1 text-xs leading-5" style={{ color: colors.textMuted }}>
+              {rail.reason}
+            </Text>
+          ) : null}
         </View>
         <Pressable
           accessibilityRole="button"

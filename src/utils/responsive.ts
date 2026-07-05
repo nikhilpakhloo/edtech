@@ -14,7 +14,7 @@ export function useResponsiveMetrics() {
   const isLargePhone = width >= LARGE_PHONE_WIDTH;
   const horizontalPadding = isCompact ? 16 : 20;
   const contentWidth = Math.min(width, CONTENT_MAX_WIDTH);
-  const carouselCardWidth = clamp(width * (isCompact ? 0.82 : 0.76), 264, isLargePhone ? 340 : 330);
+  const carouselCardWidth = clamp(width * (isCompact ? 0.9 : 0.86), 292, isLargePhone ? 420 : 380);
   const carouselCardHeight = isCompact ? 318 : 360;
 
   return {

@@ -102,6 +102,7 @@ export const APP_STRINGS = {
     },
     forYou: 'For You',
     forYouRank: (rank: number) => `#${rank} for you`,
+    studyPlanTitle: "Today's Study Plan",
     swipeThroughCurated: (suffix: string) => `Swipe through curated ${suffix}`,
   },
   search: {
@@ -206,8 +207,12 @@ export const APP_STRINGS = {
     sections: {
       overview: 'Overview',
       outcomes: 'What you will learn',
+      practice: 'Practice checkpoints',
       session: 'Session plan',
     },
+    bookmarkBullet: 'Bookmark hard moments for quick revision later',
+    practiceBullet: 'Complete a short quiz after the concept video',
+    revisionBullet: 'Use weak-topic prompts to revise before the next session',
   },
   media: {
     premiumBadge: 'VIP',

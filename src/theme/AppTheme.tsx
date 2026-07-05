@@ -11,24 +11,37 @@ type AppThemeValue = {
   colors: (typeof colors)[ThemeMode];
   isDark: boolean;
   mode: ThemeMode;
+  setMode: (mode: ThemeMode) => void;
+  toggleMode: () => void;
 };
 
 const AppThemeContext = createContext<AppThemeValue>({
   colors: colors.dark,
   isDark: true,
   mode: 'dark',
+  setMode: () => undefined,
+  toggleMode: () => undefined,
 });
 
-export function AppThemeProvider({ children }: PropsWithChildren) {
+type AppThemeProviderProps = PropsWithChildren<{
+  mode?: ThemeMode;
+  setMode?: (mode: ThemeMode) => void;
+}>;
+
+export function AppThemeProvider({ children, mode: controlledMode, setMode }: AppThemeProviderProps) {
   const colorScheme = useColorScheme();
-  const mode: ThemeMode = colorScheme === 'light' ? 'light' : 'dark';
+  const mode: ThemeMode = controlledMode ?? (colorScheme === 'light' ? 'light' : 'dark');
   const value = useMemo<AppThemeValue>(
     () => ({
       colors: colors[mode],
       isDark: mode === 'dark',
       mode,
+      setMode: setMode ?? (() => undefined),
+      toggleMode: () => {
+        setMode?.(mode === 'dark' ? 'light' : 'dark');
+      },
     }),
-    [mode],
+    [mode, setMode],
   );
 
   useEffect(() => {

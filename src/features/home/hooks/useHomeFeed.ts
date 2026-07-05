@@ -27,14 +27,14 @@ export function useHomeFeed(mode: HomeModeId) {
     nextPage: 1,
   });
 
-  const loadFeed = useCallback(async (loadMode: 'initial' | 'refresh' = 'initial') => {
+  const loadFeed = useCallback(async (loadMode: 'initial' | 'refresh' | 'silent' = 'initial') => {
     setState((current) => ({
       ...current,
       error: null,
       hasMore: loadMode === 'refresh' ? current.hasMore : true,
-      isLoading: loadMode === 'initial',
+      isLoading: loadMode === 'initial' || loadMode === 'refresh',
       isLoadingMore: false,
-      isRefreshing: loadMode === 'refresh',
+      isRefreshing: false,
       nextPage: loadMode === 'refresh' ? current.nextPage : 1,
     }));
 
@@ -51,7 +51,7 @@ export function useHomeFeed(mode: HomeModeId) {
       });
     } catch (error) {
       setState((current) => ({
-        data: loadMode === 'refresh' ? current.data : null,
+        data: loadMode === 'refresh' || loadMode === 'silent' ? current.data : null,
         error: error instanceof Error ? error.message : APP_STRINGS.errors.unableToLoadEdStream,
         hasMore: loadMode === 'refresh' ? current.hasMore : true,
         isLoading: false,
@@ -158,10 +158,15 @@ export function useHomeFeed(mode: HomeModeId) {
     };
   }, [mode]);
 
+  const refresh = useCallback(() => loadFeed('refresh'), [loadFeed]);
+  const retry = useCallback(() => loadFeed('initial'), [loadFeed]);
+  const silentRefresh = useCallback(() => loadFeed('silent'), [loadFeed]);
+
   return {
     ...state,
     loadMore,
-    refresh: () => loadFeed('refresh'),
-    retry: () => loadFeed('initial'),
+    refresh,
+    retry,
+    silentRefresh,
   };
 }

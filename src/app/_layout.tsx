@@ -18,8 +18,10 @@ void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [showSplash, setShowSplash] = useState(true);
+  const [themeOverride, setThemeOverride] = useState<'dark' | 'light' | null>(null);
   const colorScheme = useColorScheme();
-  const isDark = colorScheme !== 'light';
+  const themeMode = themeOverride ?? (colorScheme === 'light' ? 'light' : 'dark');
+  const isDark = themeMode === 'dark';
   const paperTheme = useMemo(
     () => (isDark ? paperDarkTheme : paperLightTheme),
     [isDark],
@@ -38,7 +40,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <PaperProvider theme={paperTheme}>
-          <AppThemeProvider>
+          <AppThemeProvider mode={themeMode} setMode={setThemeOverride}>
             <Stack
               screenOptions={{
                 animation: 'fade',

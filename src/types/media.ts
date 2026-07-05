@@ -31,7 +31,27 @@ export type MediaRail = {
   id: string;
   title: string;
   subtitle?: string;
+  reason?: string;
   items: MediaItem[];
+};
+
+export type StudyPlanItem = {
+  id: string;
+  label: string;
+  mediaId: string;
+  title: string;
+  durationMinutes: number;
+  status: 'next' | 'locked-after-video' | 'locked-after-practice' | 'ready' | 'done';
+};
+
+export type NextBestAction = {
+  title: string;
+  subtitle: string;
+  lastPlayedLesson?: string;
+  mediaId: string;
+  progressPercent: number;
+  timeRemainingMinutes: number;
+  ctaLabel: string;
 };
 
 export type HomeModeId = 'learn' | 'practice';
@@ -50,7 +70,9 @@ export type HomeFeedResponse = {
   carousel: MediaItem[];
   hero: MediaItem;
   modes: HomeModeOption[];
+  nextBestAction?: NextBestAction;
   rails: MediaRail[];
+  studyPlan?: StudyPlanItem[];
 };
 
 export type HomeRailPageResponse = {
@@ -69,10 +91,33 @@ export type ProfileSetting = {
   enabled?: boolean;
 };
 
+export type ProfileDashboardStat = {
+  id: string;
+  label: string;
+  value: string;
+  suffix: string;
+};
+
+export type ProfileQuickAction = {
+  id: string;
+  label: string;
+  caption: string;
+  icon: string;
+};
+
+export type ProfileDashboard = {
+  headline: string;
+  summary: string;
+  stats: ProfileDashboardStat[];
+  quickActions: ProfileQuickAction[];
+  streakMessage: string;
+};
+
 export type ProfileResponse = {
   displayName: string;
   planName: string;
   avatarInitials: string;
+  dashboard?: ProfileDashboard;
   settings: ProfileSetting[];
 };
 
