@@ -1,0 +1,35 @@
+[
+  {
+    "id": "default",
+    "label": "Education",
+    "description": "Learning-first launcher icon",
+    "androidAliasName": ".MainActivityClassic",
+    "androidIconDrawable": "@drawable/edstream_launcher_classic",
+    "androidIconSourceAsset": "assets/appIcon/education.png",
+    "previewBackgroundColor": "#1F80E0",
+    "previewForegroundColor": "#FFFFFF",
+    "defaultEnabled": true
+  },
+  {
+    "id": "focus",
+    "label": "Graduate",
+    "description": "Achievement launcher icon",
+    "androidAliasName": ".MainActivityFocus",
+    "androidIconDrawable": "@drawable/edstream_launcher_focus",
+    "androidIconSourceAsset": "assets/appIcon/graduate.png",
+    "previewBackgroundColor": "#030712",
+    "previewForegroundColor": "#5EEAD4",
+    "defaultEnabled": false
+  },
+  {
+    "id": "gold",
+    "label": "Thesis",
+    "description": "Deep work launcher icon",
+    "androidAliasName": ".MainActivityGold",
+    "androidIconDrawable": "@drawable/edstream_launcher_gold",
+    "androidIconSourceAsset": "assets/appIcon/thesis.png",
+    "previewBackgroundColor": "#F5C542",
+    "previewForegroundColor": "#111827",
+    "defaultEnabled": false
+  }
+]

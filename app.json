@@ -67,7 +67,8 @@
           "color": "#1F80E0",
           "defaultChannel": "study-reminders"
         }
-      ]
+      ],
+      "./plugins/withAndroidDynamicAppIcons"
     ],
     "experiments": {
       "typedRoutes": true,

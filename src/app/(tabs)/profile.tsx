@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -14,6 +15,13 @@ import { ProfileSkeleton } from "@/components/common/Skeleton";
 import { Screen } from "@/components/layout/Screen";
 import { APP_STRINGS } from "@/constants/string";
 import { apiService } from "@/data/apiService";
+import { APP_ICON_OPTIONS } from "@/features/appIcon/appIcon.config";
+import {
+  getSelectedAppIconId,
+  isDynamicAppIconSupported,
+  selectAppIcon,
+} from "@/features/appIcon/appIcon.service";
+import type { AppIconId } from "@/features/appIcon/appIcon.types";
 import {
   clearNotificationSnooze,
   getNextSnoozeOption,
@@ -74,6 +82,10 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [notificationPreferences, setNotificationPreferences] =
     useState<NotificationPreferences | null>(null);
+  const [selectedAppIconId, setSelectedAppIconId] =
+    useState<AppIconId>("default");
+  const [appIconSupported, setAppIconSupported] = useState(false);
+  const [appIconFeedback, setAppIconFeedback] = useState("");
   const [settings, setSettings] = useState<ProfileSetting[]>([]);
   const dashboard = profile?.dashboard;
   const quickActionWidth =
@@ -161,18 +173,40 @@ export default function ProfileScreen() {
     [mode, notificationPreferences, toggleMode],
   );
 
+  const updateAppIcon = useCallback(async (iconId: AppIconId) => {
+    selectionHaptic();
+
+    const result = await selectAppIcon(iconId);
+    setSelectedAppIconId(result.selectedIconId);
+    setAppIconFeedback(
+      result.status === "supported"
+        ? "Launcher icon updated."
+        : "Icon switching needs an Android development build.",
+    );
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
-    Promise.all([apiService.getProfile(), getNotificationPreferences()]).then(
-      ([response, preferences]) => {
+    Promise.all([
+      apiService.getProfile(),
+      getNotificationPreferences(),
+      getSelectedAppIconId(),
+      isDynamicAppIconSupported(),
+    ]).then(([response, preferences, iconId, iconSupported]) => {
       if (isMounted) {
         setProfile(response);
         setNotificationPreferences(preferences);
+        setSelectedAppIconId(iconId);
+        setAppIconSupported(iconSupported);
+        setAppIconFeedback(
+          iconSupported
+            ? "Choose the launcher icon shown on your Android home screen."
+            : "Icon switching needs an Android development build.",
+        );
         setSettings(withNotificationSettings(response.settings, preferences));
       }
-      },
-    );
+    });
 
     return () => {
       isMounted = false;
@@ -394,6 +428,78 @@ export default function ProfileScreen() {
           ))}
         </View>
 
+        <View style={{ marginTop: metrics.isCompact ? 24 : 28 }}>
+          <Text className="text-xl font-black" style={{ color: colors.text }}>
+            App icon
+          </Text>
+          <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
+            {appIconFeedback}
+          </Text>
+        </View>
+
+        <View className="mt-4 flex-row flex-wrap" style={{ gap: 10 }}>
+          {APP_ICON_OPTIONS.map((icon) => {
+            const selected = icon.id === selectedAppIconId;
+
+            return (
+              <Pressable
+                key={icon.id}
+                accessibilityRole="button"
+                accessibilityState={{
+                  disabled: !appIconSupported,
+                  selected,
+                }}
+                accessibilityLabel={`Use ${icon.label} app icon`}
+                className="rounded-lg border p-3"
+                disabled={!appIconSupported}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderColor: selected ? colors.primary : colors.border,
+                  opacity: appIconSupported ? 1 : 0.58,
+                  width: metrics.isCompact ? quickActionWidth : undefined,
+                  flex: metrics.isCompact ? undefined : 1,
+                }}
+                onPress={() => updateAppIcon(icon.id)}
+              >
+                <View className="flex-row items-center justify-between">
+                  <View
+                    className="h-14 w-14 items-center justify-center rounded-lg"
+                    style={{ backgroundColor: icon.previewBackgroundColor }}
+                  >
+                    <Image
+                      source={icon.previewAsset}
+                      resizeMode="contain"
+                      style={styles.appIconPreview}
+                    />
+                  </View>
+                  {selected ? (
+                    <View
+                      className="h-7 w-7 items-center justify-center rounded-full"
+                      style={{ backgroundColor: colors.primary }}
+                    >
+                      <Ionicons name="checkmark" color="#FFFFFF" size={17} />
+                    </View>
+                  ) : null}
+                </View>
+                <Text
+                  numberOfLines={1}
+                  className="mt-3 text-sm font-black"
+                  style={{ color: colors.text }}
+                >
+                  {icon.label}
+                </Text>
+                <Text
+                  numberOfLines={2}
+                  className="mt-1 text-xs leading-4"
+                  style={{ color: colors.textMuted }}
+                >
+                  {icon.description}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
         <View
           className="mt-6 rounded-lg border p-4"
           style={{
@@ -433,5 +539,9 @@ const styles = StyleSheet.create({
   },
   settingValue: {
     maxWidth: 96,
+  },
+  appIconPreview: {
+    height: 44,
+    width: 44,
   },
 });

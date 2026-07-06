@@ -3,7 +3,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 
-import { APP_STRINGS } from '@/constants/string';
+import { APP_ICON_OPTIONS, getAppIconOption } from '@/features/appIcon/appIcon.config';
+import type { AppIconOption } from '@/features/appIcon/appIcon.types';
+import { getSelectedAppIconId } from '@/features/appIcon/appIcon.service';
 import { useAppTheme } from '@/theme/AppTheme';
 
 type AnimatedSplashProps = {
@@ -12,6 +14,9 @@ type AnimatedSplashProps = {
 
 export function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
   const { isDark } = useAppTheme();
+  const [selectedAppIcon, setSelectedAppIcon] = useState<AppIconOption>(
+    APP_ICON_OPTIONS[0],
+  );
   const [containerOpacity] = useState(() => new Animated.Value(1));
   const [logoScale] = useState(() => new Animated.Value(0.82));
   const [logoOpacity] = useState(() => new Animated.Value(0));
@@ -32,6 +37,14 @@ export function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
   });
 
   useEffect(() => {
+    getSelectedAppIconId().then((iconId) => {
+      const selectedIcon = getAppIconOption(iconId);
+
+      if (selectedIcon) {
+        setSelectedAppIcon(selectedIcon);
+      }
+    });
+
     const pulse = Animated.loop(
       Animated.parallel([
         Animated.sequence([
@@ -214,7 +227,7 @@ export function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
                 }}
               />
               <Image
-                source={require('../../../assets/images/splash-icon.png')}
+                source={selectedAppIcon.previewAsset}
                 contentFit="contain"
                 style={styles.splashIcon}
               />
@@ -230,10 +243,10 @@ export function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
           <Text
             className="text-center text-[34px] font-black"
             style={{ color: isDark ? '#FFFFFF' : '#101828' }}>
-            {APP_STRINGS.brand.name}
+            {selectedAppIcon.label}
           </Text>
           <Text className="mt-1.5 text-center text-[13px] font-extrabold uppercase text-[#00A6D6]">
-            {APP_STRINGS.brand.tagline}
+            {selectedAppIcon.description}
           </Text>
         </Animated.View>
 
