@@ -68,7 +68,15 @@
           "defaultChannel": "study-reminders"
         }
       ],
-      "./plugins/withAndroidDynamicAppIcons"
+      "./plugins/withAndroidDynamicAppIcons",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "nikhil-wzo"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
