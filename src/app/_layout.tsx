@@ -10,6 +10,10 @@ import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '@/components/common/AnimatedSplash';
+import {
+  initializeNotificationInfrastructure,
+  requestNotificationPermissionOnAppEntry,
+} from '@/features/notifications/notification.service';
 import { AppThemeProvider } from '@/theme/AppTheme';
 import { paperDarkTheme, paperLightTheme } from '@/theme/paperTheme';
 import { colors } from '@/theme/tokens';
@@ -30,6 +34,10 @@ export default function RootLayout() {
 
   useEffect(() => {
     void SplashScreen.hideAsync();
+    void (async () => {
+      await initializeNotificationInfrastructure();
+      await requestNotificationPermissionOnAppEntry();
+    })();
   }, []);
 
   const handleSplashFinish = useCallback(() => {

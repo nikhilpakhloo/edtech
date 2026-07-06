@@ -1,22 +1,33 @@
 import { memo, useCallback, useMemo } from 'react';
+import type { GestureResponderEvent } from 'react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 
 import { OptimizedImage } from '@/components/media/OptimizedImage';
 import { APP_STRINGS } from '@/constants/string';
+import { useBookmarkStatus } from '@/features/bookmarks/useBookmarks';
 import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem } from '@/types/media';
 import { formatRuntime } from '@/utils/formatRuntime';
 import { impactHaptic } from '@/utils/haptics';
 
 type MediaCardProps = {
+  isBookmarked?: boolean;
   item: MediaItem;
+  onToggleBookmark?: (item: MediaItem) => void;
   onPress: (item: MediaItem) => void;
 };
 
-function MediaCardBase({ item, onPress }: MediaCardProps) {
+function MediaCardBase({
+  isBookmarked,
+  item,
+  onPress,
+  onToggleBookmark,
+}: MediaCardProps) {
   const { colors, isDark } = useAppTheme();
+  const bookmarkStatus = useBookmarkStatus(item.id);
+  const resolvedIsBookmarked = isBookmarked ?? bookmarkStatus.isBookmarked;
   const metadata = useMemo(
     () => `${item.languages[0]} - ${formatRuntime(item.runtimeMinutes, item.seasonCount)}`,
     [item.languages, item.runtimeMinutes, item.seasonCount],
@@ -25,6 +36,16 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
     impactHaptic();
     onPress(item);
   }, [item, onPress]);
+  const handleToggleBookmark = useCallback((event: GestureResponderEvent) => {
+    event.stopPropagation();
+    impactHaptic();
+    if (onToggleBookmark) {
+      onToggleBookmark(item);
+      return;
+    }
+
+    void bookmarkStatus.toggleBookmark();
+  }, [bookmarkStatus, item, onToggleBookmark]);
 
   return (
     <Pressable
@@ -63,7 +84,22 @@ function MediaCardBase({ item, onPress }: MediaCardProps) {
             </Text>
           </View>
         ) : null}
-        <View className="absolute bottom-0 left-0 right-0 h-16 bg-black/45" />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            resolvedIsBookmarked
+              ? `Remove ${item.title} from bookmarks`
+              : `Bookmark ${item.title}`
+          }
+          className="absolute bottom-3 right-2 h-7 w-7 items-center justify-center rounded-full"
+          style={styles.bookmarkButton}
+          onPress={handleToggleBookmark}>
+          <Ionicons
+            name={resolvedIsBookmarked ? 'bookmark' : 'bookmark-outline'}
+            color={resolvedIsBookmarked ? '#F5C542' : '#FFFFFF'}
+            size={15}
+          />
+        </Pressable>
         <View className="absolute bottom-3 left-2 h-7 w-7 items-center justify-center rounded-full bg-white/90">
           <Ionicons name="play" color="#030712" size={13} />
         </View>
@@ -99,6 +135,9 @@ const styles = StyleSheet.create({
     left: 0,
     position: 'absolute',
     right: 0,
+  },
+  bookmarkButton: {
+    backgroundColor: 'rgba(3,7,18,0.72)',
   },
 });
 

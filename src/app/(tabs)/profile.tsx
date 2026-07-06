@@ -14,9 +14,16 @@ import { ProfileSkeleton } from "@/components/common/Skeleton";
 import { Screen } from "@/components/layout/Screen";
 import { APP_STRINGS } from "@/constants/string";
 import { apiService } from "@/data/apiService";
+import {
+  clearNotificationSnooze,
+  getNextSnoozeOption,
+  getNotificationPreferences,
+  getSnoozeLabel,
+  snoozeNotifications,
+} from "@/features/notifications/notification.service";
+import type { NotificationPreferences } from "@/features/notifications/notificationPreferences.types";
 import { useAppTheme } from "@/theme/AppTheme";
 import type {
-  ProfileQuickAction,
   ProfileResponse,
   ProfileSetting,
 } from "@/types/media";
@@ -31,6 +38,7 @@ const settingIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
   downloads: "cloud-download-outline",
   language: "language-outline",
   notifications: "notifications-outline",
+  notificationSnooze: "time-outline",
   theme: "moon-outline",
 };
 
@@ -41,32 +49,69 @@ const settingValueOptions: Record<string, string[]> = {
   theme: ["Dark", "System", "Light"],
 };
 
+const NOTIFICATION_SNOOZE_SETTING_ID = "notificationSnooze";
+
+function withNotificationSettings(
+  settings: ProfileSetting[],
+  preferences: NotificationPreferences,
+) {
+  const snoozeSetting: ProfileSetting = {
+    id: NOTIFICATION_SNOOZE_SETTING_ID,
+    title: "Snooze reminders",
+    description: "Pause study notifications for minutes, hours, or days",
+    value: getSnoozeLabel(preferences),
+  };
+  const appearanceSetting =
+    settings.find((setting) => setting.id === "theme") ?? null;
+
+  return appearanceSetting ? [snoozeSetting, appearanceSetting] : [snoozeSetting];
+}
+
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { colors, isDark, mode, toggleMode } = useAppTheme();
   const metrics = useResponsiveMetrics();
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
-  const [selectedActionId, setSelectedActionId] = useState<string | null>(null);
+  const [notificationPreferences, setNotificationPreferences] =
+    useState<NotificationPreferences | null>(null);
   const [settings, setSettings] = useState<ProfileSetting[]>([]);
   const dashboard = profile?.dashboard;
-  const quickActions = dashboard?.quickActions ?? [];
-  const selectedAction = useMemo(
-    () =>
-      quickActions.find((action) => action.id === selectedActionId) ??
-      quickActions[0],
-    [quickActions, selectedActionId],
-  );
   const quickActionWidth =
     (metrics.contentWidth - metrics.horizontalPadding * 2 - 12) / 2;
-
-  const handleQuickAction = useCallback((action: ProfileQuickAction) => {
-    selectionHaptic();
-    setSelectedActionId(action.id);
-  }, []);
+  const displayedSettings = useMemo(
+    () =>
+      settings.map((setting) =>
+        setting.id === "theme"
+          ? {
+              ...setting,
+              enabled: mode === "dark",
+              value: mode === "dark" ? "Dark" : "Light",
+            }
+          : setting,
+      ),
+    [mode, settings],
+  );
 
   const updateSetting = useCallback(
-    (setting: ProfileSetting) => {
+    async (setting: ProfileSetting) => {
       selectionHaptic();
+
+      if (setting.id === NOTIFICATION_SNOOZE_SETTING_ID) {
+        const preferences =
+          notificationPreferences ?? (await getNotificationPreferences());
+        const nextOption = getNextSnoozeOption(preferences);
+        const nextPreferences = nextOption.unit
+          ? await snoozeNotifications(nextOption.value, nextOption.unit)
+          : await clearNotificationSnooze();
+
+        setNotificationPreferences(nextPreferences);
+        setSettings((currentSettings) =>
+          withNotificationSettings(currentSettings, nextPreferences),
+        );
+
+        return;
+      }
+
       setSettings((currentSettings) =>
         currentSettings.map((currentSetting) => {
           if (currentSetting.id !== setting.id) {
@@ -113,38 +158,26 @@ export default function ProfileScreen() {
         toggleMode();
       }
     },
-    [mode, toggleMode],
+    [mode, notificationPreferences, toggleMode],
   );
 
   useEffect(() => {
     let isMounted = true;
 
-    apiService.getProfile().then((response) => {
+    Promise.all([apiService.getProfile(), getNotificationPreferences()]).then(
+      ([response, preferences]) => {
       if (isMounted) {
         setProfile(response);
-        setSettings(response.settings);
-        setSelectedActionId(response.dashboard?.quickActions[0]?.id ?? null);
+        setNotificationPreferences(preferences);
+        setSettings(withNotificationSettings(response.settings, preferences));
       }
-    });
+      },
+    );
 
     return () => {
       isMounted = false;
     };
   }, []);
-
-  useEffect(() => {
-    setSettings((currentSettings) =>
-      currentSettings.map((setting) =>
-        setting.id === "theme"
-          ? {
-              ...setting,
-              enabled: mode === "dark",
-              value: mode === "dark" ? "Dark" : "Light",
-            }
-          : setting,
-      ),
-    );
-  }, [mode]);
 
   if (!profile) {
     return (
@@ -282,7 +315,7 @@ export default function ProfileScreen() {
             {APP_STRINGS.profile.preferencesTitle}
           </Text>
           <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
-            {APP_STRINGS.profile.preferencesSubtitle}
+            Manage reminder snooze and appearance.
           </Text>
         </View>
 
@@ -293,7 +326,7 @@ export default function ProfileScreen() {
             borderColor: isDark ? "rgba(255,255,255,0.1)" : colors.border,
           }}
         >
-          {settings.map((setting, index) => (
+          {displayedSettings.map((setting, index) => (
             <Pressable
               key={setting.id}
               accessibilityRole="button"
@@ -301,7 +334,7 @@ export default function ProfileScreen() {
               className="flex-row items-center border-b px-4 py-4"
               style={{
                 borderBottomColor:
-                  index === settings.length - 1
+                  index === displayedSettings.length - 1
                     ? "transparent"
                     : isDark
                       ? "rgba(255,255,255,0.1)"

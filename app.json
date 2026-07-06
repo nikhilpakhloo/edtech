@@ -60,6 +60,13 @@
         {
           "supportsPictureInPicture": true
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#1F80E0",
+          "defaultChannel": "study-reminders"
+        }
       ]
     ],
     "experiments": {

@@ -18,6 +18,7 @@ import { HomeTopExperience } from "@/components/media/HomeTopExperience";
 import { MediaRail } from "@/components/media/MediaRail";
 import { APP_STRINGS } from "@/constants/string";
 import { useHomeFeed } from "@/features/home/hooks/useHomeFeed";
+import { requestNotificationPermissionOnAppEntry } from "@/features/notifications/notification.service";
 import { useAppTheme } from "@/theme/AppTheme";
 import type {
   HomeModeId,
@@ -77,7 +78,12 @@ export default function HomeScreen() {
   }, []);
 
   const renderRail = useCallback<ListRenderItem<MediaRailType>>(
-    ({ item }) => <MediaRail rail={item} onSelectMedia={handleSelectMedia} />,
+    ({ item }) => (
+      <MediaRail
+        rail={item}
+        onSelectMedia={handleSelectMedia}
+      />
+    ),
     [handleSelectMedia],
   );
   const renderFooter = useCallback(() => {
@@ -94,6 +100,8 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      void requestNotificationPermissionOnAppEntry();
+
       if (!hasFocusedOnce.current) {
         hasFocusedOnce.current = true;
         return;

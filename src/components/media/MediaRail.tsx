@@ -17,11 +17,19 @@ type MediaRailProps = {
   onSelectMedia: (item: MediaItem) => void;
 };
 
-function MediaRailBase({ rail, onSelectMedia }: MediaRailProps) {
+function MediaRailBase({
+  onSelectMedia,
+  rail,
+}: MediaRailProps) {
   const { colors } = useAppTheme();
   const metrics = useResponsiveMetrics();
   const renderItem = useCallback<ListRenderItem<MediaItem>>(
-    ({ item }) => <MediaCard item={item} onPress={onSelectMedia} />,
+    ({ item }) => (
+      <MediaCard
+        item={item}
+        onPress={onSelectMedia}
+      />
+    ),
     [onSelectMedia],
   );
   const handleViewAll = useCallback(() => {

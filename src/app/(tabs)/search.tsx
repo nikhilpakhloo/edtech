@@ -172,7 +172,10 @@ export default function SearchScreen() {
   const renderItem = useCallback<ListRenderItem<MediaItem>>(
     ({ item }) => (
       <View className="mr-4">
-        <MediaCard item={item} onPress={handleSelectMedia} />
+        <MediaCard
+          item={item}
+          onPress={handleSelectMedia}
+        />
       </View>
     ),
     [handleSelectMedia],
