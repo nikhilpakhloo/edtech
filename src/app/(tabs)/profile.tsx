@@ -42,9 +42,11 @@ import {
   captureFatalNativeCrash,
   captureHandledException,
   identifyDemoLearner,
+  startFreshClaritySession,
   setFeatureTags,
   setLearningContext,
   Sentry,
+  trackClarityEvent,
 } from "@/services/observability";
 import { selectionHaptic } from "@/utils/haptics";
 import { useResponsiveMetrics } from "@/utils/responsive";
@@ -120,6 +122,10 @@ export default function ProfileScreen() {
   const updateSetting = useCallback(
     async (setting: ProfileSetting) => {
       selectionHaptic();
+      trackClarityEvent("profile_setting_pressed", {
+        settingId: setting.id,
+        settingValue: setting.value,
+      });
 
       if (setting.id === NOTIFICATION_SNOOZE_SETTING_ID) {
         const preferences =
@@ -188,6 +194,9 @@ export default function ProfileScreen() {
 
   const updateAppIcon = useCallback(async (iconId: AppIconId) => {
     selectionHaptic();
+    trackClarityEvent("profile_app_icon_selected", {
+      iconId,
+    });
 
     const result = await selectAppIcon(iconId);
     setSelectedAppIconId(result.selectedIconId);
@@ -201,6 +210,10 @@ export default function ProfileScreen() {
   const sendSentryLogsTest = useCallback(() => {
     selectionHaptic();
 
+    trackClarityEvent("profile_send_telemetry_pressed", {
+      testPanel: "profile",
+      testType: "identity-tags-context",
+    });
     identifyDemoLearner();
     setFeatureTags({
       feature: "profile",
@@ -232,6 +245,10 @@ export default function ProfileScreen() {
   const sendSentryReplayErrorTest = useCallback(() => {
     selectionHaptic();
 
+    trackClarityEvent("profile_replay_error_pressed", {
+      expectedReplay: true,
+      testPanel: "profile",
+    });
     addMonitoringBreadcrumb("Learner tapped replay error verification", {
       expectedAttachments: ["session replay", "screenshot", "view hierarchy"],
     });
@@ -261,13 +278,28 @@ export default function ProfileScreen() {
   }, []);
 
   const runAllSafeSentryTests = useCallback(() => {
+    trackClarityEvent("profile_run_all_safe_tests_pressed", {
+      safeTestCount: 2,
+      testPanel: "profile",
+    });
     sendSentryLogsTest();
     sendSentryReplayErrorTest();
     setSentryFeedback("Sent all safe Sentry tests.");
   }, [sendSentryLogsTest, sendSentryReplayErrorTest]);
 
+  const startNewClaritySessionTest = useCallback(() => {
+    selectionHaptic();
+    startFreshClaritySession("profile-test-panel");
+    setSentryFeedback("Requested a fresh Clarity session with demo tags.");
+  }, []);
+
   const triggerNativeSentryCrash = useCallback(() => {
     selectionHaptic();
+    trackClarityEvent("profile_native_crash_pressed", {
+      crashType: "native",
+      intentional: true,
+      testPanel: "profile",
+    });
     addMonitoringBreadcrumb("Native crash test armed", {
       screen: "profile",
       warning: "intentional-development-crash",
@@ -599,7 +631,7 @@ export default function ProfileScreen() {
           })}
         </View>
 
-        {__DEV__ ? (
+        {true ? (
           <View style={{ marginTop: metrics.isCompact ? 24 : 28 }}>
             <Text className="text-xl font-black" style={{ color: colors.text }}>
               Sentry tests
@@ -632,6 +664,12 @@ export default function ProfileScreen() {
                   icon: "play-circle-outline",
                   label: "Run safe tests",
                   onPress: runAllSafeSentryTests,
+                },
+                {
+                  description: "Starts a new Clarity session and applies demo identifiers.",
+                  icon: "scan-circle-outline",
+                  label: "Refresh Clarity",
+                  onPress: startNewClaritySessionTest,
                 },
                 {
                   description: "Intentional native crash. Event appears after restart.",

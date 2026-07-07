@@ -1,6 +1,6 @@
 import "../../global.css";
 
-import { Stack } from "expo-router";
+import { Stack, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -15,7 +15,11 @@ import {
   requestNotificationPermissionOnAppEntry,
 } from "@/features/notifications/notification.service";
 import { AppThemeProvider } from "@/theme/AppTheme";
-import { initializeObservability, Sentry } from "@/services/observability";
+import {
+  initializeObservability,
+  Sentry,
+  trackScreenView,
+} from "@/services/observability";
 import { paperDarkTheme, paperLightTheme } from "@/theme/paperTheme";
 import { colors } from "@/theme/tokens";
 
@@ -24,6 +28,7 @@ void SplashScreen.preventAutoHideAsync();
 initializeObservability();
 
 function RootLayout() {
+  const pathname = usePathname();
   const [showSplash, setShowSplash] = useState(true);
   const [themeOverride, setThemeOverride] = useState<"dark" | "light" | null>(
     null,
@@ -45,6 +50,13 @@ function RootLayout() {
       await requestNotificationPermissionOnAppEntry();
     })();
   }, []);
+
+  useEffect(() => {
+    trackScreenView(pathname, {
+      routeSource: "expo-router",
+      themeMode,
+    });
+  }, [pathname, themeMode]);
 
   const handleSplashFinish = useCallback(() => {
     setShowSplash(false);
