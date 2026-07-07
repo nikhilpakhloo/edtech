@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import * as Sentry from "@sentry/react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -37,6 +36,16 @@ import type {
   ProfileResponse,
   ProfileSetting,
 } from "@/types/media";
+import {
+  addMonitoringBreadcrumb,
+  captureDemoMessage,
+  captureFatalNativeCrash,
+  captureHandledException,
+  identifyDemoLearner,
+  setFeatureTags,
+  setLearningContext,
+  Sentry,
+} from "@/services/observability";
 import { selectionHaptic } from "@/utils/haptics";
 import { useResponsiveMetrics } from "@/utils/responsive";
 import { getTabBarContentPadding } from "@/utils/tabBar";
@@ -192,12 +201,23 @@ export default function ProfileScreen() {
   const sendSentryLogsTest = useCallback(() => {
     selectionHaptic();
 
-    Sentry.addBreadcrumb({
-      category: "edstream.sentry-test",
-      level: "info",
-      message: "User started Sentry logs test",
+    identifyDemoLearner();
+    setFeatureTags({
+      feature: "profile",
+      lesson_mode: "practice",
+      plan: "premium-demo",
     });
-    Sentry.captureMessage("EdStream Sentry test message", "info");
+    setLearningContext({
+      activeScreen: "profile",
+      currentLessonId: "lesson-react-native-observability",
+      progressPercent: 0.68,
+      streakDays: 7,
+    });
+    addMonitoringBreadcrumb("Profile Sentry verification started", {
+      source: "dev-dashboard",
+      testType: "message-logs-context",
+    });
+    captureDemoMessage("EdStream observability smoke test");
     Sentry.logger.trace("EdStream trace log", { source: "profile" });
     Sentry.logger.debug("EdStream debug log", { source: "profile" });
     Sentry.logger.info("EdStream info log", { source: "profile" });
@@ -206,25 +226,38 @@ export default function ProfileScreen() {
     Sentry.logger.fatal("EdStream fatal log", { source: "profile" });
     console.info("EdStream console info log for Sentry");
     console.warn("EdStream console warning log for Sentry");
-    setSentryFeedback("Sent logs, breadcrumbs, and a message.");
+    setSentryFeedback("Sent user, tags, context, breadcrumbs, logs, and message.");
   }, []);
 
   const sendSentryReplayErrorTest = useCallback(() => {
     selectionHaptic();
 
-    Sentry.addBreadcrumb({
-      category: "edstream.sentry-test",
-      level: "warning",
-      message: "Capturing replay/screenshot/view hierarchy test error",
-    });
-    Sentry.setContext("edstream_test", {
+    addMonitoringBreadcrumb("Learner tapped replay error verification", {
       expectedAttachments: ["session replay", "screenshot", "view hierarchy"],
-      screen: "profile",
     });
-    Sentry.captureException(
-      new Error("EdStream Sentry replay screenshot view hierarchy test"),
+    setFeatureTags({
+      experiment: "assignment-observability-demo",
+      feature: "profile",
+      replay_test: true,
+    });
+    setLearningContext({
+      activeScreen: "profile",
+      failingAction: "resume-course",
+      mediaId: "rn-observability-101",
+    });
+    captureHandledException(
+      new Error("EdStream handled exception with replay context"),
+      {
+        feature: "profile",
+        flow: "resume-course",
+        metadata: {
+          expectedAttachments: ["session replay", "screenshot", "view hierarchy"],
+          mediaId: "rn-observability-101",
+          retryable: true,
+        },
+      },
     );
-    setSentryFeedback("Sent an error for replay/screenshot attachments.");
+    setSentryFeedback("Sent handled exception with tags, context, and replay hints.");
   }, []);
 
   const runAllSafeSentryTests = useCallback(() => {
@@ -235,10 +268,19 @@ export default function ProfileScreen() {
 
   const triggerNativeSentryCrash = useCallback(() => {
     selectionHaptic();
+    addMonitoringBreadcrumb("Native crash test armed", {
+      screen: "profile",
+      warning: "intentional-development-crash",
+    });
+    setFeatureTags({
+      crash_type: "native",
+      feature: "profile",
+      intentional: true,
+    });
     setIsSendingNativeCrash(true);
     setSentryFeedback("Sending native crash...");
     setTimeout(() => {
-      Sentry.nativeCrash();
+      captureFatalNativeCrash();
     }, 350);
   }, []);
 
@@ -574,13 +616,13 @@ export default function ProfileScreen() {
             >
               {[
                 {
-                  description: "Message, breadcrumbs, Sentry logs, console logs.",
+                  description: "User, tags, context, breadcrumbs, message, and logs.",
                   icon: "receipt-outline",
-                  label: "Send logs",
+                  label: "Send telemetry",
                   onPress: sendSentryLogsTest,
                 },
                 {
-                  description: "Error event that can attach replay, screenshot, and view tree.",
+                  description: "Handled exception with replay, tags, and learning context.",
                   icon: "videocam-outline",
                   label: "Send replay error",
                   onPress: sendSentryReplayErrorTest,
