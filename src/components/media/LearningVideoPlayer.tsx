@@ -7,7 +7,6 @@ import { AppState, Pressable, StyleSheet, View } from "react-native";
 
 import { OptimizedImage } from "@/components/media/OptimizedImage";
 import { APP_STRINGS } from "@/constants/string";
-import { trackClarityEvent } from "@/services/observability";
 import { useAppTheme } from "@/theme/AppTheme";
 import type { StreamType } from "@/types/media";
 import { toggleHaptic } from "@/utils/haptics";
@@ -82,11 +81,6 @@ function LearningVideoPlayerBase({
 
   const handleToggleMute = useCallback(() => {
     toggleHaptic(!muted);
-    trackClarityEvent("video_mute_toggled", {
-      muted: !muted,
-      streamType,
-      title,
-    });
     // expo-video exposes mute as a mutable player control.
     // eslint-disable-next-line react-hooks/immutability
     player.muted = !player.muted;
@@ -113,11 +107,6 @@ function LearningVideoPlayerBase({
         surfaceType="textureView"
         onFirstFrameRender={() => {
           setHasFirstFrame(true);
-          trackClarityEvent("video_first_frame_rendered", {
-            autoPlay,
-            streamType,
-            title,
-          });
         }}
         style={styles.video}
       />

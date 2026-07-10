@@ -10,10 +10,7 @@ import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AnimatedSplash } from "@/components/common/AnimatedSplash";
-import {
-  initializeNotificationInfrastructure,
-  requestNotificationPermissionOnAppEntry,
-} from "@/features/notifications/notification.service";
+import * as NotificationService from "@/features/notifications/notification.service";
 import { AppThemeProvider } from "@/theme/AppTheme";
 import {
   Clarity,
@@ -47,8 +44,12 @@ function RootLayout() {
   useEffect(() => {
     void SplashScreen.hideAsync();
     void (async () => {
-      await initializeNotificationInfrastructure();
-      await requestNotificationPermissionOnAppEntry();
+      try {
+        await NotificationService.initializeNotificationInfrastructure();
+        await NotificationService.requestNotificationPermissionOnAppEntry();
+      } catch (e) {
+        console.error("Failed to initialize notifications:", e);
+      }
     })();
   }, []);
 

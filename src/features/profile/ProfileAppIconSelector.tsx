@@ -9,7 +9,6 @@ import {
   selectAppIcon,
 } from "@/features/appIcon/appIcon.config";
 import { useAppTheme } from "@/theme/AppTheme";
-import { trackClarityEvent } from "@/services/observability";
 import { selectionHaptic } from "@/utils/haptics";
 import { useResponsiveMetrics } from "@/utils/responsive";
 
@@ -28,7 +27,6 @@ export function ProfileAppIconSelector() {
 
   const updateAppIcon = useCallback(async (iconId: AppIconId) => {
     selectionHaptic();
-    trackClarityEvent("profile_app_icon_selected", { iconId });
     
     const success = selectAppIcon(iconId);
     if (success) {

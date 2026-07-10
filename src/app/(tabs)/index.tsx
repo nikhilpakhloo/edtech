@@ -1,4 +1,4 @@
-import { router, type Href, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, type Href } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { ListRenderItem } from "react-native";
 import {
@@ -19,7 +19,6 @@ import { MediaRail } from "@/components/media/MediaRail";
 import { APP_STRINGS } from "@/constants/string";
 import { useHomeFeed } from "@/features/home/hooks/useHomeFeed";
 import { requestNotificationPermissionOnAppEntry } from "@/features/notifications/notification.service";
-import { trackClarityEvent } from "@/services/observability";
 import { useAppTheme } from "@/theme/AppTheme";
 import type {
   HomeModeId,
@@ -63,21 +62,16 @@ export default function HomeScreen() {
     () =>
       data
         ? [
-            data.hero,
-            ...data.carousel,
-            ...data.rails.flatMap((rail) => rail.items),
-          ]
+          data.hero,
+          ...data.carousel,
+          ...data.rails.flatMap((rail) => rail.items),
+        ]
         : [],
     [data],
   );
 
   const handleSelectMedia = useCallback((item: MediaItem) => {
-    trackClarityEvent("home_media_opened", {
-      mediaId: item.id,
-      mode: activeMode,
-      source: "home_feed",
-      title: item.title,
-    });
+
     router.push({
       pathname: "/detail/[mediaId]",
       params: { mediaId: item.id },
@@ -85,25 +79,17 @@ export default function HomeScreen() {
   }, [activeMode]);
 
   const handleSelectMode = useCallback((mode: HomeModeId) => {
-    trackClarityEvent("home_mode_selected", {
-      fromMode: activeMode,
-      mode,
-    });
+
     setActiveMode(mode);
   }, [activeMode]);
 
   const handleRefresh = useCallback(() => {
-    trackClarityEvent("home_feed_refreshed", {
-      mode: activeMode,
-    });
+
     refresh();
   }, [activeMode, refresh]);
 
   const handleLoadMore = useCallback(() => {
-    trackClarityEvent("home_feed_load_more_requested", {
-      hasMore,
-      mode: activeMode,
-    });
+
     loadMore();
   }, [activeMode, hasMore, loadMore]);
 

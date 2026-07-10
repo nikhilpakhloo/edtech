@@ -11,7 +11,6 @@ import {
 import type { NotificationPreferences } from "@/features/notifications/notificationPreferences.types";
 import { useAppTheme } from "@/theme/AppTheme";
 import type { ProfileSetting } from "@/types/media";
-import { trackClarityEvent } from "@/services/observability";
 import { selectionHaptic } from "@/utils/haptics";
 
 const settingIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -67,10 +66,6 @@ export function ProfileSettingsList({
   const updateSetting = useCallback(
     async (setting: ProfileSetting) => {
       selectionHaptic();
-      trackClarityEvent("profile_setting_pressed", {
-        settingId: setting.id,
-        settingValue: setting.value,
-      });
 
       if (setting.id === NOTIFICATION_SNOOZE_SETTING_ID) {
         const nextOption = getNextSnoozeOption(initialPreferences);

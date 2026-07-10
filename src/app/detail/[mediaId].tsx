@@ -22,7 +22,6 @@ import { APP_STRINGS } from "@/constants/string";
 import { learningProgressStore } from "@/data/learningProgressStore";
 import { DetailAnimatedHeader } from "@/features/detail/components/DetailAnimatedHeader";
 import { useMediaDetail } from "@/features/detail/hooks/useMediaDetail";
-import { trackClarityEvent } from "@/services/observability";
 import { useAppTheme } from "@/theme/AppTheme";
 import type {
   DetailContentSection,
@@ -51,10 +50,6 @@ export default function DetailScreen() {
   });
   const handleBack = useCallback(() => {
     selectionHaptic();
-    trackClarityEvent("detail_back_pressed", {
-      mediaId,
-      title: item?.title ?? "unknown",
-    });
     if (router.canGoBack()) {
       router.back();
       return;
@@ -64,18 +59,8 @@ export default function DetailScreen() {
   }, [item?.title, mediaId]);
   const handleHeaderAction = useCallback((actionId = "header") => {
     selectionHaptic();
-    trackClarityEvent("detail_action_pressed", {
-      actionId,
-      mediaId,
-      title: item?.title ?? "unknown",
-    });
   }, [item?.title, mediaId]);
   const handleSelectMedia = useCallback((selectedItem: MediaItem) => {
-    trackClarityEvent("detail_related_media_opened", {
-      mediaId: selectedItem.id,
-      sourceMediaId: mediaId,
-      title: selectedItem.title,
-    });
     router.push({
       pathname: "/detail/[mediaId]",
       params: { mediaId: selectedItem.id },
@@ -85,11 +70,6 @@ export default function DetailScreen() {
   useEffect(() => {
     if (item) {
       detailStartedAtRef.current = Date.now();
-      trackClarityEvent("detail_screen_loaded", {
-        mediaId: item.id,
-        streamType: item.streamType,
-        title: item.title,
-      });
       learningProgressStore.recordLastPlayed(item);
     }
 
@@ -100,12 +80,6 @@ export default function DetailScreen() {
 
       const durationMs = Date.now() - detailStartedAtRef.current;
 
-      trackClarityEvent("detail_time_spent", {
-        durationMs,
-        durationSeconds: Math.round(durationMs / 1000),
-        mediaId: item.id,
-        title: item.title,
-      });
       detailStartedAtRef.current = null;
     };
   }, [item]);

@@ -1,6 +1,6 @@
-import Constants from "expo-constants";
 import * as Clarity from "@microsoft/react-native-clarity";
 import * as Sentry from "@sentry/react-native";
+import Constants from "expo-constants";
 
 const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN;
 const APP_ENV =
@@ -66,4 +66,5 @@ export function trackScreenView(screenName: string, metadata: Record<string, unk
   }
 }
 
-export { Sentry, Clarity };
+export { Clarity, Sentry };
+
