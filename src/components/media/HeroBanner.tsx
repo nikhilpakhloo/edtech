@@ -7,6 +7,7 @@ import { Button } from 'react-native-paper';
 import { MetadataPill } from '@/components/media/MetadataPill';
 import { OptimizedImage } from '@/components/media/OptimizedImage';
 import { APP_STRINGS } from '@/constants/string';
+import { trackClarityEvent } from '@/services/observability';
 import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem } from '@/types/media';
 import { formatRuntime } from '@/utils/formatRuntime';
@@ -20,11 +21,15 @@ function HeroBannerBase({ item }: HeroBannerProps) {
   const { colors, isDark } = useAppTheme();
   const handleOpen = useCallback(() => {
     impactHaptic();
+    trackClarityEvent('hero_banner_action_pressed', {
+      mediaId: item.id,
+      title: item.title,
+    });
     router.push({
       pathname: '/detail/[mediaId]',
       params: { mediaId: item.id },
     } as unknown as Href);
-  }, [item.id]);
+  }, [item.id, item.title]);
 
   return (
     <View className="mb-8">

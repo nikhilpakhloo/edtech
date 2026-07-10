@@ -6,6 +6,7 @@ import { FlatList, Pressable, Text, View } from 'react-native';
 import { EmptyState } from '@/components/common/EmptyState';
 import { MediaCard } from '@/components/media/MediaCard';
 import { APP_STRINGS } from '@/constants/string';
+import { trackClarityEvent } from '@/services/observability';
 import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem, MediaRail as MediaRailType } from '@/types/media';
 import { selectionHaptic } from '@/utils/haptics';
@@ -27,15 +28,28 @@ function MediaRailBase({
     ({ item }) => (
       <MediaCard
         item={item}
-        onPress={onSelectMedia}
+        onPress={(selectedItem) => {
+          trackClarityEvent('rail_media_pressed', {
+            mediaId: selectedItem.id,
+            railId: rail.id,
+            railTitle: rail.title,
+            title: selectedItem.title,
+          });
+          onSelectMedia(selectedItem);
+        }}
       />
     ),
-    [onSelectMedia],
+    [onSelectMedia, rail.id, rail.title],
   );
   const handleViewAll = useCallback(() => {
     selectionHaptic();
+    trackClarityEvent('rail_view_all_pressed', {
+      itemCount: rail.items.length,
+      railId: rail.id,
+      railTitle: rail.title,
+    });
     router.push('/search');
-  }, []);
+  }, [rail.id, rail.items.length, rail.title]);
 
   if (!rail.items.length) {
     return (

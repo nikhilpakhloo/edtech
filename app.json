@@ -68,13 +68,32 @@
           "defaultChannel": "study-reminders"
         }
       ],
-      "./plugins/withAndroidDynamicAppIcons",
       [
         "@sentry/react-native/expo",
         {
           "url": "https://sentry.io/",
           "project": "react-native",
           "organization": "nikhil-wzo"
+        }
+      ],
+      [
+        "@mozzius/expo-dynamic-app-icon",
+        {
+          "education": {
+            "ios": "./assets/appIcon/education.png",
+            "android": "./assets/appIcon/education.png",
+            "prerendered": true
+          },
+          "graduate": {
+            "ios": "./assets/appIcon/graduate.png",
+            "android": "./assets/appIcon/graduate.png",
+            "prerendered": true
+          },
+          "thesis": {
+            "ios": "./assets/appIcon/thesis.png",
+            "android": "./assets/appIcon/thesis.png",
+            "prerendered": true
+          }
         }
       ]
     ],

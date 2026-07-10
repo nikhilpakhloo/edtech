@@ -20,6 +20,7 @@ import { SearchSkeleton } from '@/components/common/Skeleton';
 import { MediaCard } from '@/components/media/MediaCard';
 import { APP_STRINGS } from '@/constants/string';
 import { apiService } from '@/data/apiService';
+import { trackClarityEvent } from '@/services/observability';
 import { useAppTheme } from '@/theme/AppTheme';
 import type { MediaItem, MediaRail as MediaRailType } from '@/types/media';
 import { selectionHaptic } from '@/utils/haptics';
@@ -131,6 +132,11 @@ export default function SearchScreen() {
       return;
     }
 
+    trackClarityEvent('search_query_changed', {
+      query: normalizedQuery,
+      queryLength: normalizedQuery.length,
+    });
+
     let isMounted = true;
 
     apiService
@@ -163,11 +169,16 @@ export default function SearchScreen() {
   }, [normalizedQuery]);
 
   const handleSelectMedia = useCallback((item: MediaItem) => {
+    trackClarityEvent('search_media_opened', {
+      mediaId: item.id,
+      query: normalizedQuery || 'browse',
+      title: item.title,
+    });
     router.push({
       pathname: '/detail/[mediaId]',
       params: { mediaId: item.id },
     } as unknown as Href);
-  }, []);
+  }, [normalizedQuery]);
 
   const renderItem = useCallback<ListRenderItem<MediaItem>>(
     ({ item }) => (
@@ -181,6 +192,9 @@ export default function SearchScreen() {
     [handleSelectMedia],
   );
   const handleRefresh = useCallback(() => {
+    trackClarityEvent('search_refreshed', {
+      query: normalizedQuery || 'browse',
+    });
     setIsRefreshing(true);
 
     Promise.all([
@@ -198,6 +212,11 @@ export default function SearchScreen() {
     if (!canLoadMore) {
       return;
     }
+
+    trackClarityEvent('search_load_more_requested', {
+      nextPage: searchState.page + 1,
+      query: normalizedQuery,
+    });
 
     loadSearchPage(normalizedQuery, searchState.page + 1, 'append').catch((loadError) => {
       setSearchState((current) => ({ ...current, isLoadingMore: false }));
@@ -270,6 +289,9 @@ export default function SearchScreen() {
               className="h-9 w-9 items-center justify-center"
               onPress={() => {
                 selectionHaptic();
+                trackClarityEvent('search_cleared', {
+                  previousQuery: normalizedQuery,
+                });
                 setQuery('');
               }}>
               <Ionicons name="close-circle" color="#9AA7BC" size={20} />

@@ -16,6 +16,7 @@ import {
 } from "@/features/notifications/notification.service";
 import { AppThemeProvider } from "@/theme/AppTheme";
 import {
+  Clarity,
   initializeObservability,
   Sentry,
   trackScreenView,
@@ -49,6 +50,15 @@ function RootLayout() {
       await initializeNotificationInfrastructure();
       await requestNotificationPermissionOnAppEntry();
     })();
+  }, []);
+
+  useEffect(() => {
+    Sentry.setUser({
+      id: "demo-learner-1042",
+      email: "nikhiltesting@example.test",
+      username: "Nikhil Testing",
+    });
+    void Clarity.setCustomUserId("demo-learner-1042").catch(() => undefined);
   }, []);
 
   useEffect(() => {

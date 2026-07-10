@@ -19,6 +19,7 @@ import { MediaRail } from "@/components/media/MediaRail";
 import { APP_STRINGS } from "@/constants/string";
 import { useHomeFeed } from "@/features/home/hooks/useHomeFeed";
 import { requestNotificationPermissionOnAppEntry } from "@/features/notifications/notification.service";
+import { trackClarityEvent } from "@/services/observability";
 import { useAppTheme } from "@/theme/AppTheme";
 import type {
   HomeModeId,
@@ -71,11 +72,40 @@ export default function HomeScreen() {
   );
 
   const handleSelectMedia = useCallback((item: MediaItem) => {
+    trackClarityEvent("home_media_opened", {
+      mediaId: item.id,
+      mode: activeMode,
+      source: "home_feed",
+      title: item.title,
+    });
     router.push({
       pathname: "/detail/[mediaId]",
       params: { mediaId: item.id },
     } as unknown as Href);
-  }, []);
+  }, [activeMode]);
+
+  const handleSelectMode = useCallback((mode: HomeModeId) => {
+    trackClarityEvent("home_mode_selected", {
+      fromMode: activeMode,
+      mode,
+    });
+    setActiveMode(mode);
+  }, [activeMode]);
+
+  const handleRefresh = useCallback(() => {
+    trackClarityEvent("home_feed_refreshed", {
+      mode: activeMode,
+    });
+    refresh();
+  }, [activeMode, refresh]);
+
+  const handleLoadMore = useCallback(() => {
+    trackClarityEvent("home_feed_load_more_requested", {
+      hasMore,
+      mode: activeMode,
+    });
+    loadMore();
+  }, [activeMode, hasMore, loadMore]);
 
   const renderRail = useCallback<ListRenderItem<MediaRailType>>(
     ({ item }) => (
@@ -124,7 +154,7 @@ export default function HomeScreen() {
           <HomeModeButtons
             activeMode={activeMode}
             modes={modeOptions}
-            onSelectMode={setActiveMode}
+            onSelectMode={handleSelectMode}
           />
         </View>
         <HomeSkeleton />
@@ -156,7 +186,7 @@ export default function HomeScreen() {
         <HomeModeButtons
           activeMode={data.activeMode}
           modes={modeOptions}
-          onSelectMode={setActiveMode}
+          onSelectMode={handleSelectMode}
         />
       </View>
       <FlatList
@@ -177,7 +207,7 @@ export default function HomeScreen() {
           />
         }
         ListFooterComponent={renderFooter}
-        onEndReached={loadMore}
+        onEndReached={handleLoadMore}
         onEndReachedThreshold={0.45}
         contentContainerStyle={{
           paddingBottom: getTabBarContentPadding(insets.bottom),
@@ -185,7 +215,7 @@ export default function HomeScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
-            onRefresh={refresh}
+            onRefresh={handleRefresh}
             tintColor="#FFFFFF"
             progressBackgroundColor="#10141F"
             colors={["#4F8CFF"]}

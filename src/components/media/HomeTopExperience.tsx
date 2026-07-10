@@ -10,6 +10,7 @@ import Carousel, {
 import { OptimizedImage } from "@/components/media/OptimizedImage";
 import { APP_STRINGS } from "@/constants/string";
 import { learningProgressStore } from "@/data/learningProgressStore";
+import { trackClarityEvent } from "@/services/observability";
 import { useAppTheme } from "@/theme/AppTheme";
 import type {
   HomeModeId,
@@ -87,6 +88,11 @@ function HomeTopExperienceBase({
           }}
           onPress={() => {
             impactHaptic();
+            trackClarityEvent("home_carousel_card_pressed", {
+              mediaId: item.id,
+              rank: index + 1,
+              title: item.title,
+            });
             onSelectMedia(item);
           }}
         >
@@ -145,6 +151,13 @@ function HomeTopExperienceBase({
       const item = mediaItemsById[step.mediaId] ?? nextBestActionItem;
 
       impactHaptic();
+      trackClarityEvent("study_plan_step_pressed", {
+        durationMinutes: step.durationMinutes,
+        mediaId: step.mediaId,
+        stepId: step.id,
+        status: step.status,
+        title: step.title,
+      });
       learningProgressStore.completeStudyPlanItem(step.id);
       onSelectMedia(item);
     },
@@ -235,6 +248,11 @@ function HeroCard({
         }}
         onPress={() => {
           impactHaptic();
+          trackClarityEvent("home_hero_pressed", {
+            mediaId: hero.id,
+            mode: activeMode,
+            title: hero.title,
+          });
           onSelectMedia(hero);
         }}
       >
@@ -333,6 +351,11 @@ function ResumeCard({
           className="min-h-10 justify-center rounded-full bg-white px-4"
           onPress={() => {
             impactHaptic();
+            trackClarityEvent("resume_learning_pressed", {
+              mediaId: item.id,
+              progressPercent: nextBestAction.progressPercent,
+              title: item.title,
+            });
             onSelectMedia(item);
           }}
         >

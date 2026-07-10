@@ -1,12 +1,9 @@
+import { APP_ICON_OPTIONS, getAppIconOption, getSelectedAppIconId, type AppIconOption } from '@/features/appIcon/appIcon.config';
+import { useAppTheme } from '@/theme/AppTheme';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
-
-import { APP_ICON_OPTIONS, getAppIconOption } from '@/features/appIcon/appIcon.config';
-import type { AppIconOption } from '@/features/appIcon/appIcon.types';
-import { getSelectedAppIconId } from '@/features/appIcon/appIcon.service';
-import { useAppTheme } from '@/theme/AppTheme';
 
 type AnimatedSplashProps = {
   onFinish: () => void;
@@ -14,9 +11,7 @@ type AnimatedSplashProps = {
 
 export function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
   const { isDark } = useAppTheme();
-  const [selectedAppIcon, setSelectedAppIcon] = useState<AppIconOption>(
-    APP_ICON_OPTIONS[0],
-  );
+  const [selectedAppIcon, setSelectedAppIcon] = useState<AppIconOption>(APP_ICON_OPTIONS[0]);
   const [containerOpacity] = useState(() => new Animated.Value(1));
   const [logoScale] = useState(() => new Animated.Value(0.82));
   const [logoOpacity] = useState(() => new Animated.Value(0));
@@ -37,13 +32,11 @@ export function AnimatedSplash({ onFinish }: AnimatedSplashProps) {
   });
 
   useEffect(() => {
-    getSelectedAppIconId().then((iconId) => {
-      const selectedIcon = getAppIconOption(iconId);
-
-      if (selectedIcon) {
-        setSelectedAppIcon(selectedIcon);
-      }
-    });
+    const iconId = getSelectedAppIconId();
+    const selectedIcon = getAppIconOption(iconId);
+    if (selectedIcon) {
+      setSelectedAppIcon(selectedIcon);
+    }
 
     const pulse = Animated.loop(
       Animated.parallel([
